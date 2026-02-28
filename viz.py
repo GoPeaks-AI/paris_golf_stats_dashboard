@@ -76,12 +76,12 @@ def main():
         for i, (label, color) in enumerate(zip(legend_labels, legend_colors)):
             rect = mpatches.Rectangle((i, 0), 1, 1, color=color)
             ax.add_patch(rect)
-            ax.text(i + 0.5, 0.5, label, ha='center', va='center', fontsize=3, color='white')
+            ax.text(i + 0.5, 0.5, label, ha='center', va='center', fontsize=4, color='white')
         ax.set_xlim(0, 3)
         ax.set_ylim(0, 1)
         ax.axis('off')
         # Place legend in the center of three columns (centered, 1/4 width)
-        left_col, center_col, right_col = st.columns([1, 2, 1])
+        left_col, center_col, right_col = st.columns([1, 3, 1])
         with center_col:
             st.pyplot(fig)
         plt.close(fig)
