@@ -1,4 +1,3 @@
-%%writefile paris_golf_stats.py
 import pandas as pd
 import numpy as np
 
