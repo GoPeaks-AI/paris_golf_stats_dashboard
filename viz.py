@@ -70,17 +70,20 @@ def main():
 
     def show_color_legend():
         import matplotlib.patches as mpatches
-        fig, ax = plt.subplots(figsize=(4, 0.07))  # Reduce height to 1/10
+        fig, ax = plt.subplots(figsize=(4, 0.07))  # Legend stays compact
         legend_labels = ['LPGA Tour Average', 'D1 Average', 'Paris Summary']
         legend_colors = ['#ffcccc', '#b3d9ff', '#ffe6f0']
         for i, (label, color) in enumerate(zip(legend_labels, legend_colors)):
             rect = mpatches.Rectangle((i, 0), 1, 1, color=color)
             ax.add_patch(rect)
-            ax.text(i + 0.5, 0.5, label, ha='center', va='center', fontsize=1)
+            ax.text(i + 0.5, 0.5, label, ha='center', va='center', fontsize=3)
         ax.set_xlim(0, 3)
         ax.set_ylim(0, 1)
         ax.axis('off')
-        st.pyplot(fig)
+        # Place legend in the center of three columns (centered, 1/4 width)
+        left_col, center_col, right_col = st.columns([1, 2, 1])
+        with center_col:
+            st.pyplot(fig)
         plt.close(fig)
 
     # --- Viz - Score Diff ---
