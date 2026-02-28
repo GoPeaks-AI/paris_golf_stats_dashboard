@@ -60,26 +60,151 @@ def main():
     with tab2:
         st.subheader("Visualizations")
 
-        # Row 1 (two chart slots)
-        r1c1, r1c2 = st.columns(2)
-        with r1c1:
-            st.empty()  # placeholder for Chart 1
-        with r1c2:
-            st.empty()  # placeholder for Chart 2
+        course_col_name = next((c for c in df.columns if c.lower() == 'course'), None)
+        if course_col_name is None:
+            st.info("No 'Course' column found for comparison charts.")
+        else:
+            comparison_df = df[df[course_col_name].isin(
+                ['Paris Summary', 'D1 Average', 'LPGA Tour Average']
+            )].copy()
 
-        # Row 2 (two chart slots)
-        r2c1, r2c2 = st.columns(2)
-        with r2c1:
-            st.empty()  # placeholder for Chart 3
-        with r2c2:
-            st.empty()  # placeholder for Chart 4
+            def col(name):
+                return next((c for c in df.columns if c.lower() == name.lower()), None)
 
-        # Row 3 (two chart slots)
-        r3c1, r3c2 = st.columns(2)
-        with r3c1:
-            st.empty()  # placeholder for Chart 5
-        with r3c2:
-            st.empty()  # placeholder for Chart 6
+            percentage_cols = [col('FIR %'), col('GIR %'), col('Up and Down %')]
+            percentage_cols = [c for c in percentage_cols if c is not None]
+
+            putt_cols = [col(x) for x in [
+                'Total Putts per Hole',
+                'Total Putts per Hole >= 30ft',
+                'Total Putts per Hole 20-30ft',
+                'Total Putts per Hole 10-20ft',
+                'Total Putts per Hole 5-10ft',
+                'Total Putts per Hole <= 5ft'
+            ]]
+            putt_cols = [c for c in putt_cols if c is not None]
+
+            non_putt_other_cols = [col(x) for x in [
+                'Diff from Par/Slope',
+                'Par 3 - Diff per Hole',
+                'Par 4 - Diff per Hole',
+                'Par 5 - Diff per Hole',
+                'Avg GIR Green Miss (Yd)',
+                'Avg GIR Pin Miss (ft)'
+            ]]
+            non_putt_other_cols = [c for c in non_putt_other_cols if c is not None]
+
+            custom_colors = {
+                'Paris Summary': '#FFC0CB',
+                'D1 Average': '#4B9CD3',
+                'LPGA Tour Average': '#8C1515'
+            }
+
+            # Row 1: putt metrics — each metric in its own column
+            if putt_cols:
+                cols = st.columns(len(putt_cols))
+                for i, metric in enumerate(putt_cols):
+                    with cols[i]:
+                        fig, ax = plt.subplots(figsize=(4, 3))
+                        sns.barplot(
+                            x=metric, y=course_col_name, data=comparison_df, ax=ax,
+                            hue=course_col_name,
+                            palette=[custom_colors.get(k, '#999999') for k in ['Paris Summary','D1 Average','LPGA Tour Average']],
+                            dodge=False, orient='h', legend=False
+                        )
+
+                        # Capture original y labels (category names)
+                        orig_labels = [t.get_text() for t in ax.get_yticklabels()]
+
+                        # For first column: remove y-axis tick labels and annotate bars with course names
+                        if i == 0:
+                            ax.set_ylabel('')
+                            ax.set_yticks([])  # remove tick marks/labels
+                            # annotate each bar with the course name centered inside the bar
+                            for lbl, p in zip(orig_labels, ax.patches):
+                                width = p.get_width()
+                                y = p.get_y() + p.get_height() / 2
+                                # choose text color for contrast
+                                text_color = 'black'
+                                ax.text(width / 2, y, lbl, va='center', ha='center', color=text_color, fontsize=9)
+                        else:
+                            # other columns: no y ticks/labels
+                            ax.set_ylabel('')
+                            ax.set_yticks([])
+
+                        ax.set_xlabel(metric)
+                        for container in ax.containers:
+                            try:
+                                ax.bar_label(container, fmt='%.2f', fontsize=8)
+                            except Exception:
+                                pass
+                        st.pyplot(fig)
+                        plt.close(fig)
+
+            # Row 2: non-putt other metrics — each metric in its own column
+            if non_putt_other_cols:
+                cols = st.columns(len(non_putt_other_cols))
+                for i, metric in enumerate(non_putt_other_cols):
+                    with cols[i]:
+                        fig, ax = plt.subplots(figsize=(4, 3))
+                        sns.barplot(
+                            x=metric, y=course_col_name, data=comparison_df, ax=ax,
+                            hue=course_col_name,
+                            palette=[custom_colors.get(k, '#999999') for k in ['Paris Summary','D1 Average','LPGA Tour Average']],
+                            dodge=False, orient='h', legend=False
+                        )
+
+                        orig_labels = [t.get_text() for t in ax.get_yticklabels()]
+
+                        if i == 0:
+                            ax.set_ylabel('')
+                            ax.set_yticks([])
+                            for lbl, p in zip(orig_labels, ax.patches):
+                                width = p.get_width()
+                                y = p.get_y() + p.get_height() / 2
+                                text_color = 'black'
+                                ax.text(width / 2, y, lbl, va='center', ha='center', color=text_color, fontsize=9)
+                        else:
+                            ax.set_ylabel('')
+                            ax.set_yticks([])
+
+                        ax.set_xlabel(metric)
+                        for container in ax.containers:
+                            try:
+                                ax.bar_label(container, fmt='%.2f', fontsize=8)
+                            except Exception:
+                                pass
+                        st.pyplot(fig)
+                        plt.close(fig)
+
+            # Row 3: percentage donut charts — one row per metric, 3 columns (one per course)
+            if percentage_cols:
+                course_names = ['Paris Summary', 'D1 Average', 'LPGA Tour Average']
+                for metric in percentage_cols:
+                    cols = st.columns(3)
+                    for i, course_name in enumerate(course_names):
+                        with cols[i]:
+                            try:
+                                val = comparison_df[comparison_df[course_col_name] == course_name][metric].iloc[0]
+                            except Exception:
+                                val = 0
+                            if pd.isna(val):
+                                val = 0
+                            sizes = [val, max(0, 100 - float(val))]
+                            colors = [custom_colors.get(course_name, '#999999'), '#e0e0e0']
+                            fig, ax = plt.subplots(figsize=(3, 3))
+                            wedges, texts, autotexts = ax.pie(
+                                sizes, colors=colors, autopct='%1.1f%%', startangle=90,
+                                pctdistance=0.85, wedgeprops=dict(width=0.3, edgecolor='w')
+                            )
+                            centre_circle = plt.Circle((0, 0), 0.70, fc='white')
+                            ax.add_artist(centre_circle)
+                            ax.set_title(f"{course_name}\n{metric}", fontsize=10)
+                            ax.axis('equal')
+                            st.pyplot(fig)
+                            plt.close(fig)
+
+    st.write("Made with ❤️ by dad 🤓.")
 
 if __name__ == '__main__':
     main()
