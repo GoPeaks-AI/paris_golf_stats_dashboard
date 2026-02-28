@@ -72,33 +72,36 @@ def main():
     with tab_score:
         st.subheader("Score Differential Visualizations")
         if comparison_df is not None:
-            # All horizontal bar charts (Diff from Par/Slope, Par 3, Par 4, Par 5) in the same row
-            metrics = [col('Diff from Par/Slope'), col('Par 3 - Diff per Hole'), col('Par 4 - Diff per Hole'), col('Par 5 - Diff per Hole')]
-            metrics = [m for m in metrics if m]
+            # All horizontal bar charts in the same row, custom color for each bar
+            metrics = [
+                (col('Diff from Par/Slope'), 'Diff from Par/Slope'),
+                (col('Par 3 - Diff per Hole'), 'Par 3 - Diff per Hole'),
+                (col('Par 4 - Diff per Hole'), 'Par 4 - Diff per Hole'),
+                (col('Par 5 - Diff per Hole'), 'Par 5 - Diff per Hole')
+            ]
+            metrics = [(m, label) for m, label in metrics if m]
             if metrics:
                 cols = st.columns(len(metrics))
-                for i, metric in enumerate(metrics):
+                # Define custom color order: light pink, Tarheel blue, Stanford red
+                color_map = ['#ffe6f0', '#b3d9ff', '#ffcccc']
+                for i, (metric, label) in enumerate(metrics):
                     with cols[i]:
                         fig, ax = plt.subplots(figsize=(4, 3))
-                        sns.barplot(
-                            x=metric, y=course_col_name, data=comparison_df, ax=ax,
-                            hue=course_col_name,
-                            palette=[custom_colors.get(k, '#999999') for k in course_names],
-                            dodge=False, orient='h', legend=False
-                        )
+                        # Prepare values and y labels
+                        vals = comparison_df[metric].values
+                        y_labels = comparison_df[course_col_name].values
+                        # Always plot in the order: Paris Summary, D1 Average, LPGA Tour Average
+                        order = ['Paris Summary', 'D1 Average', 'LPGA Tour Average']
+                        vals_ordered = [comparison_df[comparison_df[course_col_name]==k][metric].values[0] if k in y_labels else 0 for k in order]
+                        y_labels_ordered = order
+                        # Draw horizontal bars with custom colors
+                        ax.barh(y_labels_ordered, vals_ordered, color=color_map)
+                        ax.set_xlabel(label)
                         ax.set_ylabel('')
                         ax.set_yticks([])
-                        orig_labels = [t.get_text() for t in ax.get_yticklabels()]
-                        for lbl, p in zip(orig_labels, ax.patches):
-                            width = p.get_width()
-                            y = p.get_y() + p.get_height() / 2
-                            ax.text(width / 2, y, lbl, va='center', ha='center', color='black', fontsize=9)
-                        ax.set_xlabel(metric)
-                        for container in ax.containers:
-                            try:
-                                ax.bar_label(container, fmt='%.2f', fontsize=8)
-                            except Exception:
-                                pass
+                        for j, (v, y) in enumerate(zip(vals_ordered, y_labels_ordered)):
+                            ax.text(v/2, j, y, va='center', ha='center', color='black', fontsize=9)
+                            ax.text(v, j, f"{v:.2f}", va='center', ha='left', color='black', fontsize=8)
                         st.pyplot(fig)
                         plt.close(fig)
 
