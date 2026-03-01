@@ -43,54 +43,8 @@ def run(csv_url):
     new_df_rounds = pd.DataFrame()
     new_df_rounds["Date"] = df["Date"]
     new_df_rounds["Course"] = df["Course"]
-
-    # --- New columns: Approach and Up & Down stats ---
-    # Helper to get only columns that exist, fill missing with NaN
-    def safe_mean(df, col_list):
-        cols_present = [c for c in col_list if c in df.columns]
-        if not cols_present:
-            return pd.Series([np.nan] * len(df))
-        temp = df[cols_present].apply(pd.to_numeric, errors='coerce')
-        # Add missing columns as NaN
-        for c in col_list:
-            if c not in temp.columns:
-                temp[c] = np.nan
-        temp = temp[col_list]  # preserve order
-        return temp.mean(axis=1)
-
-    """
-    Loads golf data from a CSV URL, processes it, calculates various statistics,
-    and returns a DataFrame including individual rounds and aggregated summaries.
-
-    Args:
-        csv_url (str): The URL to the raw golf data CSV file.
-
-    Returns:
-        pd.DataFrame: A processed DataFrame with golf statistics, including
-                      "Paris Summary", "D1 Average", and "LPGA Tour Average" rows.
-    """
-    df = pd.read_csv(csv_url)
-
-    # 1. Generate new column names for the 18 holes
-    generated_column_names = []
-    for i in range(1, 19):
-        start_index = i * 20 - 12
-        end_index = i * 20 + 8
-        current_cols = df.columns[start_index:min(end_index, len(df.columns))]
-
-        for col_name in current_cols:
-            modified_name = col_name.split('.')[0] if '.' in col_name else col_name
-            final_name = f"{i} - {modified_name}"
-            generated_column_names.append(final_name)
-
-    # Assign new column names
-    df.columns = list(df.columns[:8]) + generated_column_names
-
-    # Initialize new_df for individual round statistics
-    # This `new_df_rounds` will contain only the raw golf round data before summaries are added.
-    new_df_rounds = pd.DataFrame()
-    new_df_rounds["Date"] = df["Date"]
-    new_df_rounds["Course"] = df["Course"]
+    new_df_rounds["Mode"] = df["Mode"]
+    new_df_rounds["Condition"] = df["Weather"]
 
     # Calculate Total Yds by summing 'Distance in yards' for all 18 holes
     distance_cols = [f"{i} - Distance in yards" for i in range(1, 19)]
@@ -342,10 +296,21 @@ def run(csv_url):
     # Concatenate in the desired order: individual rounds, then Paris Summary, then D1/LPGA Averages
     final_df = pd.concat([new_df_rounds, summary_df, new_rows_df], ignore_index=True)
 
-    # 5. Adjust the column order of the output DataFrame
+    # 5. Add play conditions: Mode and Condition
+    # Already added above for individual rounds. Now add for summary/average rows (set to None/np.nan)
+    for col in ["Mode", "Condition"]:
+        if col not in summary_df.columns:
+            summary_df[col] = None
+        if col not in new_rows_df.columns:
+            new_rows_df[col] = None
+
+    # 6. Adjust the column order of the output DataFrame
+    # Insert after 'Course'
     desired_column_order = [
         'Date',
         'Course',
+        'Mode',
+        'Condition',
         'Total Yds',
         'Slope Rating',
         'Score',
@@ -368,6 +333,10 @@ def run(csv_url):
         'Avg Up & Down Distance from Pin (yds)',
         'Avg Up & Down Miss from Pin (ft)'
     ]
+    # Ensure all columns exist before reordering to avoid KeyError
+    for col in desired_column_order:
+        if col not in final_df.columns:
+            final_df[col] = None
     final_df = final_df[desired_column_order]
 
     # Apply final rounding to all numeric columns for consistency across the entire DataFrame

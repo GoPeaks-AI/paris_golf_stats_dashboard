@@ -120,8 +120,19 @@ def main():
                         bars = ax.barh(y_labels_ordered, vals_ordered, color=color_map)
                         ax.set_xlabel(label)
                         ax.set_ylabel('')
-                        for bar, value in zip(bars, vals_ordered):
-                            ax.text(bar.get_width(), bar.get_y() + bar.get_height()/2, f'{value:.2f}', va='center', ha='left', fontsize=10)
+                        # Color annotation for Paris Summary: green/bold for up, red/bold for down
+                        for idx, (bar, value, label_y) in enumerate(zip(bars, vals_ordered, y_labels_ordered)):
+                            annotation = f'{value:.2f}'
+                            text_kwargs = {'va': 'center', 'ha': 'left', 'fontsize': 10}
+                            if label_y == 'Paris Summary':
+                                d1_value = vals_ordered[y_labels_ordered.index('D1 Average')]
+                                if value > d1_value:
+                                    text_kwargs['color'] = 'red'
+                                    text_kwargs['fontweight'] = 'bold'
+                                else:
+                                    text_kwargs['color'] = 'green'
+                                    text_kwargs['fontweight'] = 'bold'
+                            ax.text(bar.get_width(), bar.get_y() + bar.get_height()/2, annotation, **text_kwargs)
                         ax.set_yticks([])
                         st.pyplot(fig)
                         plt.close(fig)
@@ -155,8 +166,33 @@ def main():
                         bars = ax.barh(y_labels_ordered, vals_ordered, color=color_map)
                         ax.set_xlabel(metric)
                         ax.set_ylabel('')
-                        for bar, value in zip(bars, vals_ordered):
-                            ax.text(bar.get_width(), bar.get_y() + bar.get_height()/2, f'{value:.2f}', va='center', ha='left', fontsize=10)
+                        # Color annotation for Paris Summary: green/bold for up, red/bold for down
+                        for idx, (bar, value, label_y) in enumerate(zip(bars, vals_ordered, y_labels_ordered)):
+                            annotation = f'{value:.2f}'
+                            text_kwargs = {'va': 'center', 'ha': 'left', 'fontsize': 10}
+                            if label_y == 'Paris Summary':
+                                d1_value = vals_ordered[y_labels_ordered.index('D1 Average')]
+                                percent_metrics = ['FIR %', 'GIR %']
+                                metric_name = metric if isinstance(metric, str) else ''
+                                for colname in df.columns:
+                                    if df[colname].equals(df[metric]):
+                                        metric_name = colname
+                                        break
+                                if metric_name in percent_metrics:
+                                    if value < d1_value:
+                                        text_kwargs['color'] = 'red'
+                                        text_kwargs['fontweight'] = 'bold'
+                                    else:
+                                        text_kwargs['color'] = 'green'
+                                        text_kwargs['fontweight'] = 'bold'
+                                else:
+                                    if value > d1_value:
+                                        text_kwargs['color'] = 'red'
+                                        text_kwargs['fontweight'] = 'bold'
+                                    else:
+                                        text_kwargs['color'] = 'green'
+                                        text_kwargs['fontweight'] = 'bold'
+                            ax.text(bar.get_width(), bar.get_y() + bar.get_height()/2, annotation, **text_kwargs)
                         ax.set_yticks([])
                         st.pyplot(fig)
                         plt.close(fig)
@@ -195,8 +231,19 @@ def main():
                         bars = ax.barh(y_labels_ordered, vals_ordered, color=color_map)
                         ax.set_xlabel(metric)
                         ax.set_ylabel('')
-                        for bar, value in zip(bars, vals_ordered):
-                            ax.text(bar.get_width(), bar.get_y() + bar.get_height()/2, f'{value:.2f}', va='center', ha='left', fontsize=10)
+                        # Color annotation for Paris Summary: green/bold for up, red/bold for down
+                        for idx, (bar, value, label_y) in enumerate(zip(bars, vals_ordered, y_labels_ordered)):
+                            annotation = f'{value:.2f}'
+                            text_kwargs = {'va': 'center', 'ha': 'left', 'fontsize': 10}
+                            if label_y == 'Paris Summary':
+                                d1_value = vals_ordered[y_labels_ordered.index('D1 Average')]
+                                if value > d1_value:
+                                    text_kwargs['color'] = 'red'
+                                    text_kwargs['fontweight'] = 'bold'
+                                else:
+                                    text_kwargs['color'] = 'green'
+                                    text_kwargs['fontweight'] = 'bold'
+                            ax.text(bar.get_width(), bar.get_y() + bar.get_height()/2, annotation, **text_kwargs)
                         ax.set_yticks([])
                         st.pyplot(fig)
                         plt.close(fig)
@@ -213,8 +260,19 @@ def main():
                         bars = ax.barh(y_labels_ordered, vals_ordered, color=color_map)
                         ax.set_xlabel(metric)
                         ax.set_ylabel('')
-                        for bar, value in zip(bars, vals_ordered):
-                            ax.text(bar.get_width(), bar.get_y() + bar.get_height()/2, f'{value:.2f}', va='center', ha='left', fontsize=10)
+                        # Color annotation for Paris Summary: green/bold for up, red/bold for down
+                        for idx, (bar, value, label_y) in enumerate(zip(bars, vals_ordered, y_labels_ordered)):
+                            annotation = f'{value:.2f}'
+                            text_kwargs = {'va': 'center', 'ha': 'left', 'fontsize': 10}
+                            if label_y == 'Paris Summary':
+                                d1_value = vals_ordered[y_labels_ordered.index('D1 Average')]
+                                if value > d1_value:
+                                    text_kwargs['color'] = 'red'
+                                    text_kwargs['fontweight'] = 'bold'
+                                else:
+                                    text_kwargs['color'] = 'green'
+                                    text_kwargs['fontweight'] = 'bold'
+                            ax.text(bar.get_width(), bar.get_y() + bar.get_height()/2, annotation, **text_kwargs)
                         ax.set_yticks([])
                         st.pyplot(fig)
                         plt.close(fig)
