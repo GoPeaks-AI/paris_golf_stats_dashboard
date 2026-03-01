@@ -21,7 +21,6 @@ def fmt_number(x):
     return str(int(v)) if v.is_integer() else f"{v:.2f}"
 
 def main():
-
     # Passcode protection
     passcode = st.text_input("Enter passcode to access dashboard:", type="password")
     if passcode != "paris0223":
@@ -33,10 +32,14 @@ def main():
     csv_url = 'https://docs.google.com/spreadsheets/d/1B4xhV_zVKYWskpMqjLGuityFR6B5qOLI39zq_8Nh1Hc/export?format=csv&gid=432528582'
     df = pgs.run(csv_url)
 
+    # Ensure course_col_name is always defined before any use
+    course_col_name = None
+    if df is not None:
+        course_col_name = next((c for c in df.columns if c.lower() == 'course'), None)
+
     if df is None:
         st.info("No data loaded. Upload a CSV or provide a `paris_golf_stats` module with `load_data()` or `df`.")
         return
-
 
     tab1, tab_score, tab_shots, tab_short = st.tabs(["Table View", "Viz - Score Diff", "Viz - Shots", "Viz - Short Game"])
 
