@@ -54,9 +54,9 @@ def main():
                 if v == 'Paris Summary':
                     return ['background-color: #ffe6f0'] * len(row)
                 if v == 'D1 Average':
-                    return ['background-color: #b3d9ff'] * len(row)
+                    return ['background-color: #f4cccc'] * len(row)  # light cardinal red
                 if v == 'LPGA Tour Average':
-                    return ['background-color: #ffcccc'] * len(row)
+                    return ['background-color: #cce6f4'] * len(row)  # light deep water
                 return [''] * len(row)
             styled = df.style.apply(_highlight_row, axis=1).format(fmt_number)
             st.dataframe(styled)
@@ -72,8 +72,8 @@ def main():
     course_col_name = next((c for c in df.columns if c.lower() == 'course'), None)
     custom_colors = {
         'Paris Summary': '#ff69b4',       # pink
-        'D1 Average': '#ff0000',          # red
-        'LPGA Tour Average': '#0074d9'    # blue
+        'D1 Average': '#990000',          # Cardinal Red
+        'LPGA Tour Average': '#006994'    # Deep Water
     }
     course_names = ['LPGA Tour Average', 'D1 Average', 'Paris Summary']
     comparison_df = df[df[course_col_name].isin(course_names)].copy() if course_col_name else None
@@ -82,7 +82,7 @@ def main():
         import matplotlib.patches as mpatches
         fig, ax = plt.subplots(figsize=(4, 0.07))  # Legend stays compact
         legend_labels = ['LPGA Tour Average', 'D1 Average', 'Paris Summary']
-        legend_colors = ['#0074d9', '#ff0000', '#ff69b4']
+        legend_colors = ['#006994', '#990000', '#ff69b4']
         for i, (label, color) in enumerate(zip(legend_labels, legend_colors)):
             rect = mpatches.Rectangle((i, 0), 1, 1, color=color)
             ax.add_patch(rect)
@@ -111,7 +111,7 @@ def main():
             if metrics:
                 cols = st.columns(len(metrics))
                 order = ['Paris Summary', 'D1 Average', 'LPGA Tour Average']
-                color_map = ['#ff69b4', '#ff0000', '#0074d9']
+                color_map = ['#ff69b4', '#990000', '#006994']
                 for i, (metric, label) in enumerate(metrics):
                     with cols[i]:
                         fig, ax = plt.subplots(figsize=(4, 3))
@@ -146,7 +146,7 @@ def main():
             if shots_to_show:
                 cols = st.columns(len(shots_to_show))
                 order = ['Paris Summary', 'D1 Average', 'LPGA Tour Average']
-                color_map = ['#ff69b4', '#ff0000', '#0074d9']
+                color_map = ['#ff69b4', '#990000', '#006994']
                 for i, metric in enumerate(shots_to_show):
                     with cols[i]:
                         fig, ax = plt.subplots(figsize=(4, 3))
@@ -186,7 +186,7 @@ def main():
             if first_row_metrics:
                 cols1 = st.columns(len(first_row_metrics))
                 order = ['Paris Summary', 'D1 Average', 'LPGA Tour Average']
-                color_map = ['#ff69b4', '#ff0000', '#0074d9']
+                color_map = ['#ff69b4', '#990000', '#006994']
                 for i, metric in enumerate(first_row_metrics):
                     with cols1[i]:
                         fig, ax = plt.subplots(figsize=(4, 3))
@@ -204,7 +204,7 @@ def main():
             if putt_other_cols:
                 cols2 = st.columns(len(putt_other_cols))
                 order = ['Paris Summary', 'D1 Average', 'LPGA Tour Average']
-                color_map = ['#ff69b4', '#ff0000', '#0074d9']
+                color_map = ['#ff69b4', '#990000', '#006994']
                 for i, metric in enumerate(putt_other_cols):
                     with cols2[i]:
                         fig, ax = plt.subplots(figsize=(4, 3))
