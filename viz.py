@@ -44,7 +44,13 @@ def main():
         st.info("No data loaded. Upload a CSV or provide a `paris_golf_stats` module with `load_data()` or `df`.")
         return
 
-    tab_home, tab1, tab_score, tab_shots, tab_short = st.tabs(["🏠 Home", "Table View", "Viz - Score Diff", "Viz - Shots", "Viz - Short Game"])
+    tab_home, tab1, tab_score, tab_shots, tab_short = st.tabs([
+        "🏠 Home",
+        "𝄜 Table",
+        "🔢 Viz - Score Diff",
+        "🏌️‍♀️ Viz - Shots",
+        "⛳️ Viz - Short Game"
+    ])
 
     # --- Home Tab: Summary of Strengths and Opportunities ---
     with tab_home:
