@@ -32,17 +32,154 @@ def main():
     csv_url = 'https://docs.google.com/spreadsheets/d/1B4xhV_zVKYWskpMqjLGuityFR6B5qOLI39zq_8Nh1Hc/export?format=csv&gid=432528582'
     df = pgs.run(csv_url)
 
-    # Ensure course_col_name is always defined before any use
+    # Ensure course_col_name and comparison_df are always defined before any use
     course_col_name = None
+    comparison_df = None
     if df is not None:
         course_col_name = next((c for c in df.columns if c.lower() == 'course'), None)
-
+        if course_col_name:
+            course_names = ['LPGA Tour Average', 'D1 Average', 'Paris Summary']
+            comparison_df = df[df[course_col_name].isin(course_names)].copy()
     if df is None:
         st.info("No data loaded. Upload a CSV or provide a `paris_golf_stats` module with `load_data()` or `df`.")
         return
 
-    tab1, tab_score, tab_shots, tab_short = st.tabs(["Table View", "Viz - Score Diff", "Viz - Shots", "Viz - Short Game"])
+    tab_home, tab1, tab_score, tab_shots, tab_short = st.tabs(["🏠 Home", "Table View", "Viz - Score Diff", "Viz - Shots", "Viz - Short Game"])
 
+    # --- Home Tab: Summary of Strengths and Opportunities ---
+    with tab_home:
+        st.subheader("Paris Golf Performance Comparison")
+        if comparison_df is not None:
+            def get_annotation_color(metric, value, d1_value, group):
+                if metric == 'Up and Down %':
+                    return 'green' if value >= d1_value else 'red'
+                if group == 'score':
+                    return 'green' if value <= d1_value else 'red'
+                elif group == 'shots':
+                    percent_metrics = ['FIR %', 'GIR %']
+                    if metric in percent_metrics:
+                        return 'green' if value >= d1_value else 'red'
+                    else:
+                        return 'green' if value <= d1_value else 'red'
+                elif group == 'short':
+                    return 'green' if value <= d1_value else 'red'
+                return 'black'
+
+            # Prepare row-wise strengths and opportunities
+            summary_rows = [
+                {
+                    'label': 'Scoring Difference',
+                    'metrics': [
+                        ('Diff from Par', 'Overall Score Differential'),
+                        ('Par 3 - Diff per Hole', 'Par 3 Performance'),
+                        ('Par 4 - Diff per Hole', 'Par 4 Performance'),
+                        ('Par 5 - Diff per Hole', 'Par 5 Performance')
+                    ],
+                    'group': 'score'
+                },
+                {
+                    'label': 'Shots',
+                    'metrics': [
+                        ('FIR %', 'Fairways in Regulation %'),
+                        ('GIR %', 'Greens in Regulation %'),
+                        ('Avg Approach Distance (yds) from Pin', 'Approach Distance to Pin'),
+                        ('Avg GIR Green Miss (Yd)', 'GIR Green Miss (Yards)'),
+                        ('Avg GIR Pin Miss (ft)', 'GIR Pin Miss (Feet)')
+                    ],
+                    'group': 'shots'
+                },
+                {
+                    'label': 'Short Game',
+                    'metrics': [
+                        ('Total Putts per Hole', 'Total Putts per Hole'),
+                        ('Up and Down %', 'Up and Down %'),
+                        ('Avg Up & Down Distance from Pin (yds)', 'Up & Down Distance from Pin (Yards)'),
+                        ('Avg Up & Down Miss from Pin (ft)', 'Up & Down Miss from Pin (Feet)'),
+                        ('Total Putts per Hole <= 5ft', 'Putts per Hole <= 5ft'),
+                        ('Total Putts per Hole 5-10ft', 'Putts per Hole 5-10ft'),
+                        ('Total Putts per Hole 10-20ft', 'Putts per Hole 10-20ft'),
+                        ('Total Putts per Hole 20-30ft', 'Putts per Hole 20-30ft'),
+                        ('Total Putts per Hole >= 30ft', 'Putts per Hole >= 30ft')
+                    ],
+                    'group': 'short'
+                }
+            ]
+
+            # Build table data
+            table_data = []
+            for row in summary_rows:
+                strengths = []
+                opportunities = []
+                for metric, desc in row['metrics']:
+                    val = comparison_df[comparison_df[course_col_name]=='Paris Summary'][metric].values[0]
+                    d1 = comparison_df[comparison_df[course_col_name]=='D1 Average'][metric].values[0]
+                    color = get_annotation_color(metric, val, d1, row['group'])
+                    item = f"{desc} (Paris: {val:.2f}, D1: {d1:.2f})"
+                    if color == 'green':
+                        strengths.append(item)
+                    elif color == 'red':
+                        opportunities.append(item)
+                table_data.append((row['label'], strengths, opportunities))
+
+            # Render as a coach's letter with colored strengths/opportunities
+            letter = """
+Dear Paris,
+
+Here is a quick summary of your recent golf performance, focusing on your strengths and areas for growth. Let's keep building on what you do well and target a few key opportunities for improvement.
+"""
+            # Shots
+            shots_strengths = []
+            shots_opps = []
+            for metric, desc in summary_rows[1]['metrics']:
+                val = comparison_df[comparison_df[course_col_name]=='Paris Summary'][metric].values[0]
+                d1 = comparison_df[comparison_df[course_col_name]=='D1 Average'][metric].values[0]
+                color = get_annotation_color(metric, val, d1, 'shots')
+                if color == 'green':
+                    shots_strengths.append(f"<span style='color:green'>{desc} ({val:.2f} vs D1 {d1:.2f})</span>")
+                elif color == 'red':
+                    shots_opps.append(f"<span style='color:red'>{desc} ({val:.2f} vs D1 {d1:.2f})</span>")
+            letter += "\n\n**Shots:**\n"
+            if shots_strengths:
+                letter += "Strengths: " + ", ".join(shots_strengths) + ".\n"
+            if shots_opps:
+                letter += "Opportunities: " + ", ".join(shots_opps) + ".\n"
+
+            # Short Game
+            short_strengths = []
+            short_opps = []
+            for metric, desc in summary_rows[2]['metrics']:
+                val = comparison_df[comparison_df[course_col_name]=='Paris Summary'][metric].values[0]
+                d1 = comparison_df[comparison_df[course_col_name]=='D1 Average'][metric].values[0]
+                color = get_annotation_color(metric, val, d1, 'short')
+                if color == 'green':
+                    short_strengths.append(f"<span style='color:green'>{desc} ({val:.2f} vs D1 {d1:.2f})</span>")
+                elif color == 'red':
+                    short_opps.append(f"<span style='color:red'>{desc} ({val:.2f} vs D1 {d1:.2f})</span>")
+            letter += "\n\n**Short Game:**\n"
+            if short_strengths:
+                letter += "Strengths: " + ", ".join(short_strengths) + ".\n"
+            if short_opps:
+                letter += "Opportunities: " + ", ".join(short_opps) + ".\n"
+
+            # Scoring Difference
+            score_strengths = []
+            score_opps = []
+            for metric, desc in summary_rows[0]['metrics']:
+                val = comparison_df[comparison_df[course_col_name]=='Paris Summary'][metric].values[0]
+                d1 = comparison_df[comparison_df[course_col_name]=='D1 Average'][metric].values[0]
+                color = get_annotation_color(metric, val, d1, 'score')
+                if color == 'green':
+                    score_strengths.append(f"<span style='color:green'>{desc} ({val:.2f} vs D1 {d1:.2f})</span>")
+                elif color == 'red':
+                    score_opps.append(f"<span style='color:red'>{desc} ({val:.2f} vs D1 {d1:.2f})</span>")
+            letter += "\n\n**Scoring Difference:**\n"
+            if score_strengths:
+                letter += "Strengths: " + ", ".join(score_strengths) + ".\n"
+            if score_opps:
+                letter += "Opportunities: " + ", ".join(score_opps) + ".\n"
+
+            letter += "\nKeep up the great work and let's keep improving together!\n\n-AI Assistant Coach"
+            st.markdown(letter, unsafe_allow_html=True)
     with tab1:
         st.subheader("Table")
         course_col = next((c for c in df.columns if c.lower() == 'course'), None)
@@ -126,12 +263,21 @@ def main():
                             text_kwargs = {'va': 'center', 'ha': 'left', 'fontsize': 10}
                             if label_y == 'Paris Summary':
                                 d1_value = vals_ordered[y_labels_ordered.index('D1 Average')]
-                                if value > d1_value:
-                                    text_kwargs['color'] = 'red'
-                                    text_kwargs['fontweight'] = 'bold'
+                                # Special rule for Up and Down %
+                                if label == 'Up and Down %':
+                                    if value >= d1_value:
+                                        text_kwargs['color'] = 'green'
+                                        text_kwargs['fontweight'] = 'bold'
+                                    else:
+                                        text_kwargs['color'] = 'red'
+                                        text_kwargs['fontweight'] = 'bold'
                                 else:
-                                    text_kwargs['color'] = 'green'
-                                    text_kwargs['fontweight'] = 'bold'
+                                    if value > d1_value:
+                                        text_kwargs['color'] = 'red'
+                                        text_kwargs['fontweight'] = 'bold'
+                                    else:
+                                        text_kwargs['color'] = 'green'
+                                        text_kwargs['fontweight'] = 'bold'
                             ax.text(bar.get_width(), bar.get_y() + bar.get_height()/2, annotation, **text_kwargs)
                         ax.set_yticks([])
                         st.pyplot(fig)
@@ -172,26 +318,35 @@ def main():
                             text_kwargs = {'va': 'center', 'ha': 'left', 'fontsize': 10}
                             if label_y == 'Paris Summary':
                                 d1_value = vals_ordered[y_labels_ordered.index('D1 Average')]
-                                percent_metrics = ['FIR %', 'GIR %']
-                                metric_name = metric if isinstance(metric, str) else ''
-                                for colname in df.columns:
-                                    if df[colname].equals(df[metric]):
-                                        metric_name = colname
-                                        break
-                                if metric_name in percent_metrics:
-                                    if value < d1_value:
-                                        text_kwargs['color'] = 'red'
+                                # Special rule for Up and Down %
+                                if metric == 'Up and Down %':
+                                    if value >= d1_value:
+                                        text_kwargs['color'] = 'green'
                                         text_kwargs['fontweight'] = 'bold'
                                     else:
-                                        text_kwargs['color'] = 'green'
+                                        text_kwargs['color'] = 'red'
                                         text_kwargs['fontweight'] = 'bold'
                                 else:
-                                    if value > d1_value:
-                                        text_kwargs['color'] = 'red'
-                                        text_kwargs['fontweight'] = 'bold'
+                                    percent_metrics = ['FIR %', 'GIR %']
+                                    metric_name = metric if isinstance(metric, str) else ''
+                                    for colname in df.columns:
+                                        if df[colname].equals(df[metric]):
+                                            metric_name = colname
+                                            break
+                                    if metric_name in percent_metrics:
+                                        if value < d1_value:
+                                            text_kwargs['color'] = 'red'
+                                            text_kwargs['fontweight'] = 'bold'
+                                        else:
+                                            text_kwargs['color'] = 'green'
+                                            text_kwargs['fontweight'] = 'bold'
                                     else:
-                                        text_kwargs['color'] = 'green'
-                                        text_kwargs['fontweight'] = 'bold'
+                                        if value > d1_value:
+                                            text_kwargs['color'] = 'red'
+                                            text_kwargs['fontweight'] = 'bold'
+                                        else:
+                                            text_kwargs['color'] = 'green'
+                                            text_kwargs['fontweight'] = 'bold'
                             ax.text(bar.get_width(), bar.get_y() + bar.get_height()/2, annotation, **text_kwargs)
                         ax.set_yticks([])
                         st.pyplot(fig)
@@ -237,12 +392,21 @@ def main():
                             text_kwargs = {'va': 'center', 'ha': 'left', 'fontsize': 10}
                             if label_y == 'Paris Summary':
                                 d1_value = vals_ordered[y_labels_ordered.index('D1 Average')]
-                                if value > d1_value:
-                                    text_kwargs['color'] = 'red'
-                                    text_kwargs['fontweight'] = 'bold'
+                                # Special rule for Up and Down %
+                                if metric == 'Up and Down %':
+                                    if value >= d1_value:
+                                        text_kwargs['color'] = 'green'
+                                        text_kwargs['fontweight'] = 'bold'
+                                    else:
+                                        text_kwargs['color'] = 'red'
+                                        text_kwargs['fontweight'] = 'bold'
                                 else:
-                                    text_kwargs['color'] = 'green'
-                                    text_kwargs['fontweight'] = 'bold'
+                                    if value > d1_value:
+                                        text_kwargs['color'] = 'red'
+                                        text_kwargs['fontweight'] = 'bold'
+                                    else:
+                                        text_kwargs['color'] = 'green'
+                                        text_kwargs['fontweight'] = 'bold'
                             ax.text(bar.get_width(), bar.get_y() + bar.get_height()/2, annotation, **text_kwargs)
                         ax.set_yticks([])
                         st.pyplot(fig)
