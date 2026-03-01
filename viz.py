@@ -129,11 +129,17 @@ def main():
         show_color_legend()
         if comparison_df is not None:
             fir_col = col('FIR %')
+            approach_col = col('Avg Approach Distance (yds) from Pin')
             gir_col = col('GIR %')
             green_miss_col = col('Avg GIR Green Miss (Yd)')
             gir_pin_col = col('Avg GIR Pin Miss (ft)')
-            shots_to_show = [fir_col, gir_col, green_miss_col, gir_pin_col]
-            shots_to_show = [m for m in shots_to_show if m]
+            # Insert approach_col between FIR % and GIR %
+            shots_to_show = []
+            if fir_col: shots_to_show.append(fir_col)
+            if approach_col: shots_to_show.append(approach_col)
+            if gir_col: shots_to_show.append(gir_col)
+            if green_miss_col: shots_to_show.append(green_miss_col)
+            if gir_pin_col: shots_to_show.append(gir_pin_col)
             if shots_to_show:
                 cols = st.columns(len(shots_to_show))
                 order = ['Paris Summary', 'D1 Average', 'LPGA Tour Average']
@@ -158,22 +164,46 @@ def main():
         show_color_legend()
         if comparison_df is not None:
             putts_col = col('Total Putts per Hole')
-            putt_other_cols = [col(x) for x in [
-                'Total Putts per Hole >= 30ft',
-                'Total Putts per Hole 20-30ft',
-                'Total Putts per Hole 10-20ft',
-                'Total Putts per Hole 5-10ft',
-                'Total Putts per Hole <= 5ft']]
-            putt_other_cols = [c for c in putt_other_cols if c]
             updown_col = col('Up and Down %')
-            metrics = [putts_col] + putt_other_cols + ([updown_col] if updown_col else [])
-            metrics = [m for m in metrics if m]
-            if metrics:
-                cols = st.columns(len(metrics))
+            updown_dist_col = col('Avg Up & Down Distance from Pin (yds)')
+            updown_miss_col = col('Avg Up & Down Miss from Pin (ft)')
+            # Reorder from shortest to longest: <=5ft, 5-10ft, 10-20ft, 20-30ft, >=30ft
+            putt_order = [
+                'Total Putts per Hole <= 5ft',
+                'Total Putts per Hole 5-10ft',
+                'Total Putts per Hole 10-20ft',
+                'Total Putts per Hole 20-30ft',
+                'Total Putts per Hole >= 30ft'
+            ]
+            putt_other_cols = [col(x) for x in putt_order]
+            putt_other_cols = [c for c in putt_other_cols if c]
+            # First row: total putts, up & down %, up & down distance, up & down miss
+            first_row_metrics = [putts_col, updown_col, updown_dist_col, updown_miss_col]
+            first_row_metrics = [m for m in first_row_metrics if m]
+            if first_row_metrics:
+                cols1 = st.columns(len(first_row_metrics))
                 order = ['Paris Summary', 'D1 Average', 'LPGA Tour Average']
                 color_map = ['#ff69b4', '#ff0000', '#0074d9']
-                for i, metric in enumerate(metrics):
-                    with cols[i]:
+                for i, metric in enumerate(first_row_metrics):
+                    with cols1[i]:
+                        fig, ax = plt.subplots(figsize=(4, 3))
+                        vals_ordered = [comparison_df[comparison_df[course_col_name]==k][metric].values[0] if k in comparison_df[course_col_name].values else 0 for k in order]
+                        y_labels_ordered = order
+                        bars = ax.barh(y_labels_ordered, vals_ordered, color=color_map)
+                        ax.set_xlabel(metric)
+                        ax.set_ylabel('')
+                        for bar, value in zip(bars, vals_ordered):
+                            ax.text(bar.get_width(), bar.get_y() + bar.get_height()/2, f'{value:.2f}', va='center', ha='left', fontsize=10)
+                        ax.set_yticks([])
+                        st.pyplot(fig)
+                        plt.close(fig)
+            # Second row: all other putt distance metrics
+            if putt_other_cols:
+                cols2 = st.columns(len(putt_other_cols))
+                order = ['Paris Summary', 'D1 Average', 'LPGA Tour Average']
+                color_map = ['#ff69b4', '#ff0000', '#0074d9']
+                for i, metric in enumerate(putt_other_cols):
+                    with cols2[i]:
                         fig, ax = plt.subplots(figsize=(4, 3))
                         vals_ordered = [comparison_df[comparison_df[course_col_name]==k][metric].values[0] if k in comparison_df[course_col_name].values else 0 for k in order]
                         y_labels_ordered = order

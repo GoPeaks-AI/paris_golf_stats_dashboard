@@ -44,6 +44,54 @@ def run(csv_url):
     new_df_rounds["Date"] = df["Date"]
     new_df_rounds["Course"] = df["Course"]
 
+    # --- New columns: Approach and Up & Down stats ---
+    # Helper to get only columns that exist, fill missing with NaN
+    def safe_mean(df, col_list):
+        cols_present = [c for c in col_list if c in df.columns]
+        if not cols_present:
+            return pd.Series([np.nan] * len(df))
+        temp = df[cols_present].apply(pd.to_numeric, errors='coerce')
+        # Add missing columns as NaN
+        for c in col_list:
+            if c not in temp.columns:
+                temp[c] = np.nan
+        temp = temp[col_list]  # preserve order
+        return temp.mean(axis=1)
+
+    """
+    Loads golf data from a CSV URL, processes it, calculates various statistics,
+    and returns a DataFrame including individual rounds and aggregated summaries.
+
+    Args:
+        csv_url (str): The URL to the raw golf data CSV file.
+
+    Returns:
+        pd.DataFrame: A processed DataFrame with golf statistics, including
+                      "Paris Summary", "D1 Average", and "LPGA Tour Average" rows.
+    """
+    df = pd.read_csv(csv_url)
+
+    # 1. Generate new column names for the 18 holes
+    generated_column_names = []
+    for i in range(1, 19):
+        start_index = i * 20 - 12
+        end_index = i * 20 + 8
+        current_cols = df.columns[start_index:min(end_index, len(df.columns))]
+
+        for col_name in current_cols:
+            modified_name = col_name.split('.')[0] if '.' in col_name else col_name
+            final_name = f"{i} - {modified_name}"
+            generated_column_names.append(final_name)
+
+    # Assign new column names
+    df.columns = list(df.columns[:8]) + generated_column_names
+
+    # Initialize new_df for individual round statistics
+    # This `new_df_rounds` will contain only the raw golf round data before summaries are added.
+    new_df_rounds = pd.DataFrame()
+    new_df_rounds["Date"] = df["Date"]
+    new_df_rounds["Course"] = df["Course"]
+
     # Calculate Total Yds by summing 'Distance in yards' for all 18 holes
     distance_cols = [f"{i} - Distance in yards" for i in range(1, 19)]
     new_df_rounds["Total Yds"] = df[distance_cols].sum(axis=1)
@@ -126,7 +174,6 @@ def run(csv_url):
     new_df_rounds["Total Putts per Hole"] = total_putts / 18
 
     # 4. New logic for cumulative putting statistics by distance (excluding zeros for mean)
-    ### start the new codes
     putt_ranges_definitions = {
         "Total Putts per Hole <= 5ft": { "ranges_to_sum": ["[<= 5 ft]"], "check_key": "[<= 5 ft]" },
         "Total Putts per Hole 5-10ft": { "ranges_to_sum": ["[<= 5 ft]", "[5-10 ft]"], "check_key": "[5-10 ft]" },
@@ -161,9 +208,6 @@ def run(csv_url):
             else:
                 new_df_rounds.loc[idx, new_col_name] = 0.0 # If no holes met the condition, or all putts are zero, set to 0.0
 
-    ### end of the new codes
-
-
     # Up and Down %: Percentage of holes where GIR was missed but player made 1 shot to green, followed by 1 putt to the hole
     total_scramble_opportunities = pd.Series(0, index=df.index)
     total_successful_up_and_downs = pd.Series(0, index=df.index)
@@ -183,6 +227,27 @@ def run(csv_url):
         (total_successful_up_and_downs / total_scramble_opportunities) * 100,
         0
     )
+
+    # Add Avg Approach Distance (yds) from Pin (original: 'Approach shot distance (yds) from pin')
+    approach_dist_cols = [f"{i} - Approach shot distance (yds) from pin" for i in range(1, 19)]
+    if all(col in df.columns for col in approach_dist_cols):
+        new_df_rounds["Avg Approach Distance (yds) from Pin"] = df[approach_dist_cols].apply(pd.to_numeric, errors='coerce').mean(axis=1)
+    else:
+        new_df_rounds["Avg Approach Distance (yds) from Pin"] = np.nan
+
+    # AddAvg Up & Down Distance from Pin (yds) (original: 'Scramble up & down distance from pin (yds)')
+    updown_dist_cols = [f"{i} - Scramble up & down distance from pin (yds)" for i in range(1, 19)]
+    if all(col in df.columns for col in updown_dist_cols):
+        new_df_rounds["Avg Up & Down Distance from Pin (yds)"] = df[updown_dist_cols].apply(pd.to_numeric, errors='coerce').mean(axis=1)
+    else:
+        new_df_rounds["Avg Up & Down Distance from Pin (yds)"] = np.nan
+
+    # Add Avg Up & Down Miss from Pin (ft) (original: 'Scramble up & down miss from pin (ft)')
+    updown_miss_cols = [f"{i} - Scramble up & down miss from pin (ft)" for i in range(1, 19)]
+    if all(col in df.columns for col in updown_miss_cols):
+        new_df_rounds["Avg Up & Down Miss from Pin (ft)"] = df[updown_miss_cols].apply(pd.to_numeric, errors='coerce').mean(axis=1)
+    else:
+        new_df_rounds["Avg Up & Down Miss from Pin (ft)"] = np.nan
 
     # --- Add 'D1 Average', 'LPGA Tour Average', and 'Paris Summary' rows ---
 
@@ -207,7 +272,10 @@ def run(csv_url):
         'Total Putts per Hole 10-20ft': 1.8,
         'Total Putts per Hole 5-10ft': 1.6,
         'Total Putts per Hole <= 5ft': 1.3,
-        'Up and Down %': 55.0
+        'Up and Down %': 55.0,
+        'Avg Approach Distance (yds) from Pin': 135.0,
+        'Avg Up & Down Distance from Pin (yds)': 15.0,
+        'Avg Up & Down Miss from Pin (ft)': 10.0
     }
 
     new_row_data_2 = {
@@ -230,7 +298,10 @@ def run(csv_url):
         'Total Putts per Hole 10-20ft': 1.8,
         'Total Putts per Hole 5-10ft': 1.6,
         'Total Putts per Hole <= 5ft': 1.3,
-        'Up and Down %': 55.7
+        'Up and Down %': 55.7,
+        'Avg Approach Distance (yds) from Pin': 140.0,
+        'Avg Up & Down Distance from Pin (yds)': 22.5,
+        'Avg Up & Down Miss from Pin (ft)': 8.0
     }
     new_rows_df = pd.DataFrame([new_row_data_1, new_row_data_2])
 
@@ -242,6 +313,17 @@ def run(csv_url):
     # Calculate summary statistics from the original golf round data
     numeric_cols_for_summary = original_rounds_df_for_date.select_dtypes(include=np.number).columns
     summary_means = original_rounds_df_for_date[numeric_cols_for_summary].mean().round(2) # Round summary means
+    # Add Paris averages for new columns, only if present
+    # For Paris Summary, calculate the average of the above for each column across all csv_url rows
+    # For Paris Summary, calculate the average of the above for each column across all csv_url rows
+    for col in [
+        'Avg Approach Distance (yds) from Pin',
+        'Avg Up & Down Distance from Pin (yds)',
+        'Avg Up & Down Miss from Pin (ft)']:
+        if col in new_df_rounds.columns and new_df_rounds[col].notnull().any():
+            summary_means[col] = new_df_rounds[col].mean(skipna=True).round(2)
+        else:
+            summary_means[col] = np.nan
 
     min_date = original_rounds_df_for_date['Date'].min()
     max_date = original_rounds_df_for_date['Date'].max()
@@ -275,13 +357,16 @@ def run(csv_url):
         'GIR %',
         'Avg GIR Green Miss (Yd)',
         'Avg GIR Pin Miss (ft)',
+        'Avg Approach Distance (yds) from Pin',
         'Total Putts per Hole',
         'Total Putts per Hole >= 30ft',
         'Total Putts per Hole 20-30ft',
         'Total Putts per Hole 10-20ft',
         'Total Putts per Hole 5-10ft',
         'Total Putts per Hole <= 5ft',
-        'Up and Down %'
+        'Up and Down %',
+        'Avg Up & Down Distance from Pin (yds)',
+        'Avg Up & Down Miss from Pin (ft)'
     ]
     final_df = final_df[desired_column_order]
 
