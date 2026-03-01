@@ -48,7 +48,7 @@ def main():
 
     # --- Home Tab: Summary of Strengths and Opportunities ---
     with tab_home:
-        st.subheader("Paris Golf Performance Comparison")
+        st.subheader("A Letter of Summary")
         if comparison_df is not None:
             def get_annotation_color(metric, value, d1_value, group):
                 if metric == 'Up and Down %':
@@ -198,9 +198,9 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             styled = df.style.apply(_highlight_row, axis=1).format(fmt_number)
             st.dataframe(styled)
 
-    if not df.empty:
-        csv = df.to_csv(index=False)
-        st.download_button("Download filtered CSV", csv, "filtered.csv")
+        if not df.empty:
+            csv = df.to_csv(index=False)
+            st.download_button("Download filtered CSV", csv, "filtered.csv")
 
     # Helper functions and color setup
     def col(name):
@@ -441,7 +441,8 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                         st.pyplot(fig)
                         plt.close(fig)
 
-    st.write("Made with ❤️ by dad 🤓.")
+    st.markdown("<hr style='margin-top:2em;margin-bottom:0.5em;'>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align:center;font-size:1.1em;'>Made with ❤️ by dad 🤓.</div>", unsafe_allow_html=True)
 
 if __name__ == '__main__':
     main()
