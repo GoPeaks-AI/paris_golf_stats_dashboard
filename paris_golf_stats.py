@@ -96,7 +96,7 @@ def run(csv_url):
     distance_cols = [f"{i} - Distance in yards" for i in range(1, 19)]
     new_df_rounds["Total Yds"] = df[distance_cols].sum(axis=1)
 
-    new_df_rounds["Par/Slope"] = df["Course par/slope"]
+    new_df_rounds["Slope Rating"] = df["Course par/slope"]
 
     # Score: Sum of 'Total shots' for each hole
     total_shots_cols = [f"{i} - Total shots" for i in range(1, 19)]
@@ -106,8 +106,8 @@ def run(csv_url):
     par_cols = [f"{i} - Par" for i in range(1, 19)]
     total_par = df[par_cols].sum(axis=1)
 
-    # 1. Update 'Avg Diff from Par/Hole' to 'Diff from Par/Slope'
-    new_df_rounds["Diff from Par/Slope"] = new_df_rounds["Score"] - total_par
+    # 1. Update 'Avg Diff from Par/Hole' to 'Diff from Par'
+    new_df_rounds["Diff from Par"] = new_df_rounds["Score"] - total_par
 
     # 2. Add 'Par 3 - Diff per Hole', 'Par 4 - Diff per Hole', and 'Par 5 - Diff per Hole' columns
     par3_diff_per_round = []
@@ -256,9 +256,9 @@ def run(csv_url):
         'Date': '2026-01-01',
         'Course': 'D1 Average',
         'Total Yds': 6300.0,
-        'Par/Slope': 72.0,
+        'Slope Rating': 72.0,
         'Score': 75.0,
-        'Diff from Par/Slope': 3.0,
+        'Diff from Par': 3.0,
         'Par 3 - Diff per Hole': 0.3,
         'Par 4 - Diff per Hole': 0.55,
         'Par 5 - Diff per Hole': 0.2,
@@ -282,9 +282,9 @@ def run(csv_url):
         'Date': '2026-01-01',
         'Course': 'LPGA Tour Average',
         'Total Yds': 6500.0,
-        'Par/Slope': 72.0,
+        'Slope Rating': 72.0,
         'Score': 72.0,
-        'Diff from Par/Slope': 0.0,
+        'Diff from Par': 0.0,
         'Par 3 - Diff per Hole': 0.1,
         'Par 4 - Diff per Hole': 0.2,
         'Par 5 - Diff per Hole': -0.4,
@@ -347,9 +347,9 @@ def run(csv_url):
         'Date',
         'Course',
         'Total Yds',
-        'Par/Slope',
+        'Slope Rating',
         'Score',
-        'Diff from Par/Slope',
+        'Diff from Par',
         'Par 3 - Diff per Hole',
         'Par 4 - Diff per Hole',
         'Par 5 - Diff per Hole',

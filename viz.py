@@ -102,7 +102,7 @@ def main():
         show_color_legend()
         if comparison_df is not None:
             metrics = [
-                (col('Diff from Par/Slope'), 'Diff from Par/Slope'),
+                (col('Diff from Par'), 'Diff from Par'),
                 (col('Par 3 - Diff per Hole'), 'Par 3 - Diff per Hole'),
                 (col('Par 4 - Diff per Hole'), 'Par 4 - Diff per Hole'),
                 (col('Par 5 - Diff per Hole'), 'Par 5 - Diff per Hole')
