@@ -241,6 +241,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
 
     # --- Viz - Score Diff ---
     with tab_score:
+
         st.subheader("Score Differential Visualizations")
         show_color_legend()
         if comparison_df is not None:
@@ -288,6 +289,8 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                         ax.set_yticks([])
                         st.pyplot(fig)
                         plt.close(fig)
+
+        # --- New: Relationship between Hole Handicap and Hole Score Diff ---
 
     # --- Viz - Shots ---
     with tab_shots:
@@ -381,24 +384,57 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             first_row_metrics = [putts_col, updown_col, updown_dist_col, updown_miss_col]
             first_row_metrics = [m for m in first_row_metrics if m]
             if first_row_metrics:
-                cols1 = st.columns(len(first_row_metrics))
+                # First row: 4 charts (Total Putts per Hole, Up & Down %, Up & Down Distance, Up & Down Miss)
+                cols = st.columns(4)
                 order = ['Paris Summary', 'D1 Average', 'LPGA Tour Average']
                 color_map = ['#ff69b4', '#990000', '#006994']
-                for i, metric in enumerate(first_row_metrics):
-                    with cols1[i]:
-                        fig, ax = plt.subplots(figsize=(4, 3))
+                # Chart 1: Total Putts per Hole
+                with cols[0]:
+                    metric = first_row_metrics[0]
+                    fig, ax = plt.subplots(figsize=(4, 4))
+                    vals_ordered = [comparison_df[comparison_df[course_col_name]==k][metric].values[0] if k in comparison_df[course_col_name].values else 0 for k in order]
+                    y_labels_ordered = order
+                    bars = ax.barh(y_labels_ordered, vals_ordered, color=color_map)
+                    ax.set_xlabel(metric)
+                    ax.set_ylabel('')
+                    for idx, (bar, value, label_y) in enumerate(zip(bars, vals_ordered, y_labels_ordered)):
+                        annotation = f'{value:.2f}'
+                        text_kwargs = {'va': 'center', 'ha': 'left', 'fontsize': 10}
+                        if label_y == 'Paris Summary':
+                            d1_value = vals_ordered[y_labels_ordered.index('D1 Average')]
+                            if metric == 'Up and Down %':
+                                if value >= d1_value:
+                                    text_kwargs['color'] = 'green'
+                                    text_kwargs['fontweight'] = 'bold'
+                                else:
+                                    text_kwargs['color'] = 'red'
+                                    text_kwargs['fontweight'] = 'bold'
+                            else:
+                                if value > d1_value:
+                                    text_kwargs['color'] = 'red'
+                                    text_kwargs['fontweight'] = 'bold'
+                                else:
+                                    text_kwargs['color'] = 'green'
+                                    text_kwargs['fontweight'] = 'bold'
+                        ax.text(bar.get_width(), bar.get_y() + bar.get_height()/2, annotation, **text_kwargs)
+                    ax.set_yticks([])
+                    st.pyplot(fig)
+                    plt.close(fig)
+                # Chart 2: Up & Down %
+                if len(first_row_metrics) > 1:
+                    with cols[1]:
+                        metric = first_row_metrics[1]
+                        fig, ax = plt.subplots(figsize=(4, 4))
                         vals_ordered = [comparison_df[comparison_df[course_col_name]==k][metric].values[0] if k in comparison_df[course_col_name].values else 0 for k in order]
                         y_labels_ordered = order
                         bars = ax.barh(y_labels_ordered, vals_ordered, color=color_map)
                         ax.set_xlabel(metric)
                         ax.set_ylabel('')
-                        # Color annotation for Paris Summary: green/bold for up, red/bold for down
                         for idx, (bar, value, label_y) in enumerate(zip(bars, vals_ordered, y_labels_ordered)):
                             annotation = f'{value:.2f}'
                             text_kwargs = {'va': 'center', 'ha': 'left', 'fontsize': 10}
                             if label_y == 'Paris Summary':
                                 d1_value = vals_ordered[y_labels_ordered.index('D1 Average')]
-                                # Special rule for Up and Down %
                                 if metric == 'Up and Down %':
                                     if value >= d1_value:
                                         text_kwargs['color'] = 'green'
@@ -417,35 +453,117 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                         ax.set_yticks([])
                         st.pyplot(fig)
                         plt.close(fig)
-            # Second row: all other putt distance metrics
-            if putt_other_cols:
-                cols2 = st.columns(len(putt_other_cols))
-                order = ['Paris Summary', 'D1 Average', 'LPGA Tour Average']
-                color_map = ['#ff69b4', '#990000', '#006994']
-                for i, metric in enumerate(putt_other_cols):
-                    with cols2[i]:
-                        fig, ax = plt.subplots(figsize=(4, 3))
+                # Chart 3: Up & Down Distance
+                if len(first_row_metrics) > 2:
+                    with cols[2]:
+                        metric = first_row_metrics[2]
+                        fig, ax = plt.subplots(figsize=(4, 4))
                         vals_ordered = [comparison_df[comparison_df[course_col_name]==k][metric].values[0] if k in comparison_df[course_col_name].values else 0 for k in order]
                         y_labels_ordered = order
                         bars = ax.barh(y_labels_ordered, vals_ordered, color=color_map)
                         ax.set_xlabel(metric)
                         ax.set_ylabel('')
-                        # Color annotation for Paris Summary: green/bold for up, red/bold for down
                         for idx, (bar, value, label_y) in enumerate(zip(bars, vals_ordered, y_labels_ordered)):
                             annotation = f'{value:.2f}'
                             text_kwargs = {'va': 'center', 'ha': 'left', 'fontsize': 10}
                             if label_y == 'Paris Summary':
                                 d1_value = vals_ordered[y_labels_ordered.index('D1 Average')]
-                                if value > d1_value:
+                                if metric == 'Up and Down %':
+                                    if value >= d1_value:
+                                        text_kwargs['color'] = 'green'
+                                        text_kwargs['fontweight'] = 'bold'
+                                    else:
+                                        text_kwargs['color'] = 'red'
+                                        text_kwargs['fontweight'] = 'bold'
+                                else:
+                                    if value > d1_value:
+                                        text_kwargs['color'] = 'red'
+                                        text_kwargs['fontweight'] = 'bold'
+                                    else:
+                                        text_kwargs['color'] = 'green'
+                                        text_kwargs['fontweight'] = 'bold'
+                            ax.text(bar.get_width(), bar.get_y() + bar.get_height()/2, annotation, **text_kwargs)
+                        ax.set_yticks([])
+                        st.pyplot(fig)
+                        plt.close(fig)
+                # Chart 4: Up & Down Miss
+                if len(first_row_metrics) > 3:
+                    with cols[3]:
+                        metric = first_row_metrics[3]
+                        fig, ax = plt.subplots(figsize=(4, 4))
+                        vals_ordered = [comparison_df[comparison_df[course_col_name]==k][metric].values[0] if k in comparison_df[course_col_name].values else 0 for k in order]
+                        y_labels_ordered = order
+                        bars = ax.barh(y_labels_ordered, vals_ordered, color=color_map)
+                        ax.set_xlabel(metric)
+                        ax.set_ylabel('')
+                        for idx, (bar, value, label_y) in enumerate(zip(bars, vals_ordered, y_labels_ordered)):
+                            annotation = f'{value:.2f}'
+                            text_kwargs = {'va': 'center', 'ha': 'left', 'fontsize': 10}
+                            if label_y == 'Paris Summary':
+                                d1_value = vals_ordered[y_labels_ordered.index('D1 Average')]
+                                if metric == 'Up and Down %':
+                                    if value >= d1_value:
+                                        text_kwargs['color'] = 'green'
+                                        text_kwargs['fontweight'] = 'bold'
+                                    else:
+                                        text_kwargs['color'] = 'red'
+                                        text_kwargs['fontweight'] = 'bold'
+                                else:
+                                    if value > d1_value:
+                                        text_kwargs['color'] = 'red'
+                                        text_kwargs['fontweight'] = 'bold'
+                                    else:
+                                        text_kwargs['color'] = 'green'
+                                        text_kwargs['fontweight'] = 'bold'
+                            ax.text(bar.get_width(), bar.get_y() + bar.get_height()/2, annotation, **text_kwargs)
+                        ax.set_yticks([])
+                        st.pyplot(fig)
+                        plt.close(fig)
+
+                # Second row: merged putt distance chart (1/4 width)
+                putt_labels = [x for x in putt_order if col(x) in putt_other_cols]
+                n_distances = len(putt_labels)
+                n_groups = len(order)
+                data = []
+                for metric in putt_labels:
+                    vals = [comparison_df[comparison_df[course_col_name]==k][col(metric)].values[0] if k in comparison_df[course_col_name].values else 0 for k in order]
+                    data.append(vals)
+                data = np.array(data)
+                y = np.arange(n_distances)
+                bar_height = 0.2
+                row2_cols = st.columns([1, 1, 1, 1])  # 1/4 width for chart, 3/4 empty
+                with row2_cols[0]:
+                    fig, ax = plt.subplots(figsize=(4, 4))
+                    for i, (group, color) in enumerate(zip(order, color_map)):
+                        ax.barh(y + (i - 1) * bar_height, data[:, i], height=bar_height, label=group, color=color)
+                    ax.set_yticks(y)
+                    ax.set_yticklabels(putt_labels)
+                    ax.set_xlabel('Number of Putts')
+                    ax.set_ylabel('Distance Range')
+                    ax.set_title('Putts per Hole by Distance Range')
+                    # Annotate all bars, color Paris Summary vs D1
+                    for i in range(n_distances):
+                        for j in range(n_groups):
+                            val = data[i, j]
+                            x = val
+                            y_pos = y[i] + (j - 1) * bar_height
+                            annotation = f'{val:.2f}'
+                            text_kwargs = {'va': 'center', 'ha': 'left', 'fontsize': 10}
+                            # Paris Summary annotation color logic
+                            if j == 0:  # Paris Summary
+                                d1_value = data[i, 1]
+                                if val > d1_value:
                                     text_kwargs['color'] = 'red'
                                     text_kwargs['fontweight'] = 'bold'
                                 else:
                                     text_kwargs['color'] = 'green'
                                     text_kwargs['fontweight'] = 'bold'
-                            ax.text(bar.get_width(), bar.get_y() + bar.get_height()/2, annotation, **text_kwargs)
-                        ax.set_yticks([])
-                        st.pyplot(fig)
-                        plt.close(fig)
+                            else:
+                                text_kwargs['color'] = 'black'
+                                text_kwargs['fontweight'] = 'normal'
+                            ax.text(x, y_pos, annotation, **text_kwargs)
+                    st.pyplot(fig)
+                    plt.close(fig)
 
     st.markdown("<hr style='margin-top:2em;margin-bottom:0.5em;'>", unsafe_allow_html=True)
     st.markdown("<div style='text-align:center;font-size:1.1em;'>Made with ❤️ by dad 🤓.</div>", unsafe_allow_html=True)

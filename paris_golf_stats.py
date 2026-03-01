@@ -60,6 +60,9 @@ def run(csv_url):
     par_cols = [f"{i} - Par" for i in range(1, 19)]
     total_par = df[par_cols].sum(axis=1)
 
+    # Add data for "Diff from Par" for each hole, e.g., "1 - Diff from Par", etc.
+
+
     # 1. Update 'Avg Diff from Par/Hole' to 'Diff from Par'
     new_df_rounds["Diff from Par"] = new_df_rounds["Score"] - total_par
 
@@ -342,5 +345,6 @@ def run(csv_url):
     # Apply final rounding to all numeric columns for consistency across the entire DataFrame
     for col in final_df.select_dtypes(include=np.number).columns:
         final_df[col] = final_df[col].round(2)
+
 
     return final_df
