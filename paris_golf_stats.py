@@ -107,7 +107,8 @@ def run(csv_url):
 
     # Avg GIR Pin Miss (ft): Mean of 'Approach GIR from pin (ft)'
     avg_gir_pin_miss_cols = [f"{i} - Approach GIR from pin (ft)" for i in range(1, 19)]
-    new_df_rounds["Avg GIR Pin Miss (ft)"] = df[avg_gir_pin_miss_cols].mean(axis=1)
+    # Ensure all columns are numeric for mean calculation
+    new_df_rounds["Avg GIR Pin Miss (ft)"] = df[avg_gir_pin_miss_cols].apply(pd.to_numeric, errors='coerce').mean(axis=1)
 
     # Total Putts: Sum of all 'Putting stats' categories for each hole
     putting_stats_types = [

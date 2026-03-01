@@ -21,6 +21,13 @@ def fmt_number(x):
     return str(int(v)) if v.is_integer() else f"{v:.2f}"
 
 def main():
+
+    # Passcode protection
+    passcode = st.text_input("Enter passcode to access dashboard:", type="password")
+    if passcode != "paris0223":
+        st.warning("Incorrect or missing passcode.")
+        st.stop()
+
     st.title("Paris Golf Stats Dashboard")
 
     csv_url = 'https://docs.google.com/spreadsheets/d/1B4xhV_zVKYWskpMqjLGuityFR6B5qOLI39zq_8Nh1Hc/export?format=csv&gid=432528582'
