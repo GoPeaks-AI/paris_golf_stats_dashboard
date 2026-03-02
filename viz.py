@@ -546,13 +546,15 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                 data = np.array(data)
                 y = np.arange(n_distances)
                 bar_height = 0.2
+                # Create y-tick labels by removing 'Total Putts per Hole ' prefix
+                yticklabels = [label.replace('Total Putts per Hole ', '') for label in putt_labels]
                 row2_cols = st.columns([1, 1, 1, 1])  # 1/4 width for chart, 3/4 empty
                 with row2_cols[0]:
                     fig, ax = plt.subplots(figsize=(4, 4))
                     for i, (group, color) in enumerate(zip(order, color_map)):
                         ax.barh(y + (i - 1) * bar_height, data[:, i], height=bar_height, label=group, color=color)
                     ax.set_yticks(y)
-                    ax.set_yticklabels(putt_labels)
+                    ax.set_yticklabels(yticklabels)
                     ax.set_xlabel('Number of Putts')
                     ax.set_ylabel('Distance Range')
                     ax.set_title('Putts per Hole by Distance Range')
