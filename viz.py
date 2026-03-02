@@ -58,6 +58,20 @@ def main():
     with tab_home:
         st.subheader("A Letter of Summary")
         if comparison_df is not None:
+            # Get the last game date from the dataframe if available
+            last_game_date = None
+            date_col = next((c for c in df.columns if c.lower() == 'date'), None)
+            if date_col is not None:
+                try:
+                    last_game_date = pd.to_datetime(df[date_col], errors='coerce').max()
+                    if pd.notnull(last_game_date):
+                        last_game_date_str = last_game_date.strftime('%B %d, %Y')
+                    else:
+                        last_game_date_str = None
+                except Exception:
+                    last_game_date_str = None
+            else:
+                last_game_date_str = None
             def get_annotation_color(metric, value, d1_value, group):
                 if metric == 'Up and Down %':
                     return 'green' if value >= d1_value else 'red'
@@ -134,11 +148,13 @@ def main():
                 table_data.append((row['label'], strengths, opportunities))
 
             # Render as a coach's letter with colored strengths/opportunities
-            letter = """
+            letter = f"""
 Dear Paris,
 
 Here is a quick summary of your recent golf performance, focusing on your strengths and areas for growth. Let's keep building on what you do well and target a few key opportunities for improvement.
 """
+            if last_game_date_str:
+                letter = f"<div style='color:gray; font-size: 0.95em; margin-bottom: 0.5em;'>As of last game: <b>{last_game_date_str}</b></div>\n" + letter
             # Shots
             shots_strengths = []
             shots_opps = []
