@@ -48,10 +48,10 @@ def main():
     tab_home, tab1, tab_score, tab_shots, tab_short, tab_analytics = st.tabs([
         "🏠 Home",
         "𝄜 Table",
-        "🔢 Viz - Score Diff",
-        "🏌️‍♀️ Viz - Shots",
-        "⛳️ Viz - Short Game",
-        "📊 Viz - Analytics"
+        "🔢 Score Diff",
+        "🎯 Shots",
+        "⛳️ Short Game",
+        "📊 Analytics"
     ])
 
     # --- Home Tab: Summary of Strengths and Opportunities ---
@@ -199,7 +199,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             if score_opps:
                 letter += "Opportunities: " + ", ".join(score_opps) + ".\n"
 
-            letter += "\nKeep up the great work and let's keep improving together!\n\n-AI Assistant Coach"
+            letter += "\nKeep up the great work and let's keep improving together!\n\n-Your AI Assistant Coach 🏌️‍♀️"
             st.markdown(letter, unsafe_allow_html=True)
     with tab1:
         st.subheader("Table")
