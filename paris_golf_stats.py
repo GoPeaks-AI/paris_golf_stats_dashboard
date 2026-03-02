@@ -106,9 +106,9 @@ def run(csv_url):
     gir_sum = df[gir_cols].apply(convert_binary_column).sum(axis=1)
     new_df_rounds["GIR %"] = (gir_sum / 18) * 100
 
-    # Avg GIR Green Miss (Yd): Mean of 'Approach shot GIR miss from green (yds)'
+    # Avg GIR Green Miss (yds): Mean of 'Approach shot GIR miss from green (yds)'
     avg_gir_green_miss_cols = [f"{i} - Approach shot GIR miss from green (yds)" for i in range(1, 19)]
-    new_df_rounds["Avg GIR Green Miss (Yd)"] = df[avg_gir_green_miss_cols].mean(axis=1)
+    new_df_rounds["Avg GIR Green Miss (yds)"] = df[avg_gir_green_miss_cols].mean(axis=1)
 
     # Avg GIR Pin Miss (ft): Mean of 'Approach GIR from pin (ft)'
     avg_gir_pin_miss_cols = [f"{i} - Approach GIR from pin (ft)" for i in range(1, 19)]
@@ -221,7 +221,7 @@ def run(csv_url):
         'Par 5 - Diff per Hole': 0.2,
         'FIR %': 75.0,
         'GIR %': 65.0,
-        'Avg GIR Green Miss (Yd)': 8.0,
+        'Avg GIR Green Miss (yds)': 8.0,
         'Avg GIR Pin Miss (ft)': 21.5,
         'Total Putts per Hole': 2.0,
         'Total Putts per Hole >= 30ft': 2.1,
@@ -247,7 +247,7 @@ def run(csv_url):
         'Par 5 - Diff per Hole': -0.4,
         'FIR %': 77.5,
         'GIR %': 70.0,
-        'Avg GIR Green Miss (Yd)': 6.5,
+        'Avg GIR Green Miss (yds)': 6.5,
         'Avg GIR Pin Miss (ft)': 20.0,
         'Total Putts per Hole': 2.0,
         'Total Putts per Hole >= 30ft': 2.1,
@@ -323,7 +323,7 @@ def run(csv_url):
         'Par 5 - Diff per Hole',
         'FIR %',
         'GIR %',
-        'Avg GIR Green Miss (Yd)',
+        'Avg GIR Green Miss (yds)',
         'Avg GIR Pin Miss (ft)',
         'Avg Approach Distance (yds) from Pin',
         'Total Putts per Hole',

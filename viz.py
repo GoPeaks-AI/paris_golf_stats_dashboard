@@ -88,9 +88,9 @@ def main():
                     'metrics': [
                         ('FIR %', 'Fairways in Regulation %'),
                         ('GIR %', 'Greens in Regulation %'),
-                        ('Avg Approach Distance (yds) from Pin', 'Approach Distance to Pin'),
-                        ('Avg GIR Green Miss (Yd)', 'GIR Green Miss (Yards)'),
-                        ('Avg GIR Pin Miss (ft)', 'GIR Pin Miss (Feet)')
+                        ('Avg Approach Distance (yds) from Pin', 'Approach Distance to Pin (yds)'),
+                        ('Avg GIR Green Miss (yds)', 'GIR Green Miss (yds)'),
+                        ('Avg GIR Pin Miss (ft)', 'GIR Pin Miss (ft)')
                     ],
                     'group': 'shots'
                 },
@@ -99,8 +99,8 @@ def main():
                     'metrics': [
                         ('Total Putts per Hole', 'Total Putts per Hole'),
                         ('Up and Down %', 'Up and Down %'),
-                        ('Avg Up & Down Distance from Pin (yds)', 'Up & Down Distance from Pin (Yards)'),
-                        ('Avg Up & Down Miss from Pin (ft)', 'Up & Down Miss from Pin (Feet)'),
+                        ('Avg Up & Down Distance from Pin (yds)', 'Up & Down Distance from Pin (yds)'),
+                        ('Avg Up & Down Miss from Pin (ft)', 'Up & Down Miss from Pin (ft)'),
                         ('Total Putts per Hole <= 5ft', 'Putts per Hole <= 5ft'),
                         ('Total Putts per Hole 5-10ft', 'Putts per Hole 5-10ft'),
                         ('Total Putts per Hole 10-20ft', 'Putts per Hole 10-20ft'),
@@ -300,7 +300,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             fir_col = col('FIR %')
             approach_col = col('Avg Approach Distance (yds) from Pin')
             gir_col = col('GIR %')
-            green_miss_col = col('Avg GIR Green Miss (Yd)')
+            green_miss_col = col('Avg GIR Green Miss (yds)')
             gir_pin_col = col('Avg GIR Pin Miss (ft)')
             # Insert approach_col between FIR % and GIR %
             shots_to_show = []
