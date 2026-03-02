@@ -119,13 +119,17 @@ def main():
                 strengths = []
                 opportunities = []
                 for metric, desc in row['metrics']:
-                    val = comparison_df[comparison_df[course_col_name]=='Paris Summary'][metric].values[0]
-                    d1 = comparison_df[comparison_df[course_col_name]=='D1 Average'][metric].values[0]
-                    color = get_annotation_color(metric, val, d1, row['group'])
-                    item = f"{desc} (Paris: {val:.2f}, D1: {d1:.2f})"
-                    if color == 'green':
-                        strengths.append(item)
-                    elif color == 'red':
+                    if metric in comparison_df.columns:
+                        val = comparison_df[comparison_df[course_col_name]=='Paris Summary'][metric].values[0]
+                        d1 = comparison_df[comparison_df[course_col_name]=='D1 Average'][metric].values[0]
+                        color = get_annotation_color(metric, val, d1, row['group'])
+                        item = f"{desc} (Paris: {val:.2f}, D1: {d1:.2f})"
+                        if color == 'green':
+                            strengths.append(item)
+                        elif color == 'red':
+                            opportunities.append(item)
+                    else:
+                        item = f"{desc} (Paris: N/A, D1: N/A)"
                         opportunities.append(item)
                 table_data.append((row['label'], strengths, opportunities))
 
@@ -139,13 +143,16 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             shots_strengths = []
             shots_opps = []
             for metric, desc in summary_rows[1]['metrics']:
-                val = comparison_df[comparison_df[course_col_name]=='Paris Summary'][metric].values[0]
-                d1 = comparison_df[comparison_df[course_col_name]=='D1 Average'][metric].values[0]
-                color = get_annotation_color(metric, val, d1, 'shots')
-                if color == 'green':
-                    shots_strengths.append(f"<span style='color:green'>{desc} ({val:.2f} vs D1 {d1:.2f})</span>")
-                elif color == 'red':
-                    shots_opps.append(f"<span style='color:red'>{desc} ({val:.2f} vs D1 {d1:.2f})</span>")
+                if metric in comparison_df.columns:
+                    val = comparison_df[comparison_df[course_col_name]=='Paris Summary'][metric].values[0]
+                    d1 = comparison_df[comparison_df[course_col_name]=='D1 Average'][metric].values[0]
+                    color = get_annotation_color(metric, val, d1, 'shots')
+                    if color == 'green':
+                        shots_strengths.append(f"<span style='color:green'>{desc} ({val:.2f} vs D1 {d1:.2f})</span>")
+                    elif color == 'red':
+                        shots_opps.append(f"<span style='color:red'>{desc} ({val:.2f} vs D1 {d1:.2f})</span>")
+                else:
+                    shots_opps.append(f"<span style='color:red'>{desc} (N/A vs D1 N/A)</span>")
             letter += "\n\n**Shots:**\n"
             if shots_strengths:
                 letter += "Strengths: " + ", ".join(shots_strengths) + ".\n"
@@ -156,13 +163,16 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             short_strengths = []
             short_opps = []
             for metric, desc in summary_rows[2]['metrics']:
-                val = comparison_df[comparison_df[course_col_name]=='Paris Summary'][metric].values[0]
-                d1 = comparison_df[comparison_df[course_col_name]=='D1 Average'][metric].values[0]
-                color = get_annotation_color(metric, val, d1, 'short')
-                if color == 'green':
-                    short_strengths.append(f"<span style='color:green'>{desc} ({val:.2f} vs D1 {d1:.2f})</span>")
-                elif color == 'red':
-                    short_opps.append(f"<span style='color:red'>{desc} ({val:.2f} vs D1 {d1:.2f})</span>")
+                if metric in comparison_df.columns:
+                    val = comparison_df[comparison_df[course_col_name]=='Paris Summary'][metric].values[0]
+                    d1 = comparison_df[comparison_df[course_col_name]=='D1 Average'][metric].values[0]
+                    color = get_annotation_color(metric, val, d1, 'short')
+                    if color == 'green':
+                        short_strengths.append(f"<span style='color:green'>{desc} ({val:.2f} vs D1 {d1:.2f})</span>")
+                    elif color == 'red':
+                        short_opps.append(f"<span style='color:red'>{desc} ({val:.2f} vs D1 {d1:.2f})</span>")
+                else:
+                    short_opps.append(f"<span style='color:red'>{desc} (N/A vs D1 N/A)</span>")
             letter += "\n\n**Short Game:**\n"
             if short_strengths:
                 letter += "Strengths: " + ", ".join(short_strengths) + ".\n"
@@ -173,13 +183,16 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             score_strengths = []
             score_opps = []
             for metric, desc in summary_rows[0]['metrics']:
-                val = comparison_df[comparison_df[course_col_name]=='Paris Summary'][metric].values[0]
-                d1 = comparison_df[comparison_df[course_col_name]=='D1 Average'][metric].values[0]
-                color = get_annotation_color(metric, val, d1, 'score')
-                if color == 'green':
-                    score_strengths.append(f"<span style='color:green'>{desc} ({val:.2f} vs D1 {d1:.2f})</span>")
-                elif color == 'red':
-                    score_opps.append(f"<span style='color:red'>{desc} ({val:.2f} vs D1 {d1:.2f})</span>")
+                if metric in comparison_df.columns:
+                    val = comparison_df[comparison_df[course_col_name]=='Paris Summary'][metric].values[0]
+                    d1 = comparison_df[comparison_df[course_col_name]=='D1 Average'][metric].values[0]
+                    color = get_annotation_color(metric, val, d1, 'score')
+                    if color == 'green':
+                        score_strengths.append(f"<span style='color:green'>{desc} ({val:.2f} vs D1 {d1:.2f})</span>")
+                    elif color == 'red':
+                        score_opps.append(f"<span style='color:red'>{desc} ({val:.2f} vs D1 {d1:.2f})</span>")
+                else:
+                    score_opps.append(f"<span style='color:red'>{desc} (N/A vs D1 N/A)</span>")
             letter += "\n\n**Scoring Difference:**\n"
             if score_strengths:
                 letter += "Strengths: " + ", ".join(score_strengths) + ".\n"
