@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 import paris_golf_stats as pgs
+import paris_golf_data_subset as gpd
 
 def fmt_number(x):
     if pd.isna(x):
@@ -44,12 +45,13 @@ def main():
         st.info("No data loaded. Upload a CSV or provide a `paris_golf_stats` module with `load_data()` or `df`.")
         return
 
-    tab_home, tab1, tab_score, tab_shots, tab_short = st.tabs([
+    tab_home, tab1, tab_score, tab_shots, tab_short, tab_analytics = st.tabs([
         "🏠 Home",
         "𝄜 Table",
         "🔢 Viz - Score Diff",
         "🏌️‍♀️ Viz - Shots",
-        "⛳️ Viz - Short Game"
+        "⛳️ Viz - Short Game",
+        "📊 Viz - Analytics"
     ])
 
     # --- Home Tab: Summary of Strengths and Opportunities ---
@@ -565,8 +567,105 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                     st.pyplot(fig)
                     plt.close(fig)
 
+    with tab_analytics:
+
+        st.subheader("Paris Analytics in Detail")
+        # Legend row at the top, centered
+        legend_cols = st.columns([2, 1, 2])
+        with legend_cols[1]:
+            import matplotlib.patches as mpatches
+            import matplotlib.lines as mlines
+            blue_line = mlines.Line2D([], [], color='deepskyblue', linestyle='--', linewidth=2, label='Target')
+            red_dot = mpatches.Patch(color='red', label='Miss Target')
+            green_dot = mpatches.Patch(color='green', label='Match/Exceed Target')
+            fig_legend, ax_legend = plt.subplots(figsize=(5, 0.5))
+            ax_legend.axis('off')
+            handles = [blue_line, red_dot, green_dot]
+            ax_legend.legend(handles=handles, loc='center', ncol=3, frameon=False, fontsize=12)
+            st.pyplot(fig_legend)
+            plt.close(fig_legend)
+
+        df = gpd.run(csv_url)
+
+        # Fill GIR miss from green with 0 if empty
+        gir_miss_col = 'Approach shot GIR miss from green (yds)'
+        if gir_miss_col in df.columns:
+            df[gir_miss_col] = df[gir_miss_col].fillna(0)
+
+        cols = st.columns([1, 1, 1, 1])
+
+        # Plot hole handicap vs score diff from par in first column
+        if 'Hole Handicap' in df.columns and 'Score Diff from Par' in df.columns:
+            fig, ax = plt.subplots(figsize=(8, 5))
+            # Color by y <= 0 (green) or > 0 (red)
+            y0 = 0
+            colors = df['Score Diff from Par'].apply(lambda y: 'green' if y <= y0 else 'red')
+            ax.axhline(y0, color='deepskyblue', linestyle='--', linewidth=2, alpha=0.5)
+            ax.scatter(df['Hole Handicap'], df['Score Diff from Par'], c=colors, s=40)
+            ax.set_title('Hole Handicap vs Score Diff from Par')
+            ax.set_xlabel('Hole Handicap')
+            ax.set_ylabel('Score Diff from Par')
+            # X axis: integer between -2 and max positive integer in data (or 18 if all values are less)
+            x_min = 1
+            x_max = max(18, int(np.nanmax(df['Hole Handicap'])))
+            ax.set_xlim(x_min, x_max)
+            ax.set_xticks([i for i in range(x_min, x_max+1)])
+            # Y axis: integer ticks only, auto range
+            y_min = -2
+            y_max = int(np.ceil(np.nanmax(df['Score Diff from Par'])))
+            ax.set_yticks([i for i in range(y_min, y_max+1)])
+            with cols[0]:
+                st.pyplot(fig)
+
+        # Plot approach distance from pin vs GIR miss from green in second column
+        approach_col = 'Approach shot distance (yds) from pin'
+        if approach_col in df.columns and gir_miss_col in df.columns:
+            fig2, ax2 = plt.subplots(figsize=(8, 5))
+            y0 = 8
+            colors2 = df[gir_miss_col].apply(lambda y: 'green' if y <= y0 else 'red')
+            ax2.axhline(y0, color='deepskyblue', linestyle='--', linewidth=2, alpha=0.5)
+            ax2.scatter(df[approach_col], df[gir_miss_col], c=colors2, s=40)
+            ax2.set_title('Approach Distance from Pin vs GIR Miss from Green')
+            ax2.set_xlabel('Approach shot distance (yds) from pin')
+            ax2.set_ylabel('GIR miss from green (yds)')
+            with cols[1]:
+                st.pyplot(fig2)
+
+        # Plot approach distance from pin vs GIR miss from pin in third column, exclude empty GIR miss from pin
+        gir_miss_pin_col = 'Approach GIR from pin (ft)'
+        if approach_col in df.columns and gir_miss_pin_col in df.columns:
+            df_nonan = df.dropna(subset=[gir_miss_pin_col])
+            if not df_nonan.empty:
+                fig3, ax3 = plt.subplots(figsize=(8, 5))
+                y0 = 21.5
+                colors3 = df_nonan[gir_miss_pin_col].apply(lambda y: 'green' if y <= y0 else 'red')
+                ax3.axhline(y0, color='deepskyblue', linestyle='--', linewidth=2, alpha=0.5)
+                ax3.scatter(df_nonan[approach_col], df_nonan[gir_miss_pin_col], c=colors3, s=40)
+                ax3.set_title('Approach Distance from Pin vs GIR Miss from Pin')
+                ax3.set_xlabel('Approach shot distance (yds) from pin')
+                ax3.set_ylabel('GIR miss from pin (ft)')
+                with cols[2]:
+                    st.pyplot(fig3)
+
+        # Plot Scramble up & down distance vs Scramble up & down miss from pin in fourth column
+        updown_dist_col = 'Scramble up & down distance from pin (yds)'
+        updown_miss_col = 'Scramble up & down miss from pin (ft)'
+        if updown_dist_col in df.columns and updown_miss_col in df.columns:
+            df_updown = df.dropna(subset=[updown_dist_col])
+            if not df_updown.empty:
+                fig4, ax4 = plt.subplots(figsize=(8, 5))
+                y0 = 10
+                colors4 = df_updown[updown_miss_col].apply(lambda y: 'green' if y <= y0 else 'red')
+                ax4.axhline(y0, color='deepskyblue', linestyle='--', linewidth=2, alpha=0.5)
+                ax4.scatter(df_updown[updown_dist_col], df_updown[updown_miss_col], c=colors4, s=40)
+                ax4.set_title('Scramble Up & Down Distance vs Miss from Pin')
+                ax4.set_xlabel('Scramble up & down distance from pin (yds)')
+                ax4.set_ylabel('Scramble up & down miss from pin (ft)')
+                with cols[3]:
+                    st.pyplot(fig4)
+
     st.markdown("<hr style='margin-top:2em;margin-bottom:0.5em;'>", unsafe_allow_html=True)
-    st.markdown("<div style='text-align:center;font-size:1.1em;'>Made with ❤️ by dad 🤓.</div>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align:center;font-size:1.1em;'>Made with ❤️ by dad 👨🏻.</div>", unsafe_allow_html=True)
 
 if __name__ == '__main__':
     main()
