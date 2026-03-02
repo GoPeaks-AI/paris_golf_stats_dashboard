@@ -28,7 +28,7 @@ def main():
         st.warning("Incorrect or missing passcode.")
         st.stop()
 
-    st.title("Paris Golf Stats Dashboard")
+    st.markdown('<h1 style="color:#ff69b4;">Paris Golf Stats Dashboard</h1>', unsafe_allow_html=True)
 
     csv_url = 'https://docs.google.com/spreadsheets/d/1B4xhV_zVKYWskpMqjLGuityFR6B5qOLI39zq_8Nh1Hc/export?format=csv&gid=432528582'
     df = pgs.run(csv_url)
