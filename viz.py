@@ -276,6 +276,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
 
         st.subheader("Score Differential Visualizations")
         show_color_legend()
+
         if comparison_df is not None:
             metrics = [
                 (col('Diff from Par'), 'Diff from Par'),
@@ -285,6 +286,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             ]
             metrics = [(m, label) for m, label in metrics if m]
             if metrics:
+                st.markdown('<h4 style="margin-bottom:0.5em;">Paris vs. D1 vs. LPGA Pro</h4>', unsafe_allow_html=True)
                 cols = st.columns(len(metrics))
                 order = ['Paris Summary', 'D1 Average', 'LPGA Tour Average']
                 color_map = ['#ff69b4', '#990000', '#006994']
@@ -322,7 +324,45 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                         st.pyplot(fig)
                         plt.close(fig)
 
-        # --- New: Relationship between Hole Handicap and Hole Score Diff ---
+                # --- Second row: Paris trend lines over time ---
+                st.markdown('<h4 style="margin-bottom:0.5em;">Paris Stats Over Time</h4>', unsafe_allow_html=True)
+                # Filter for Paris only, and ensure date is sorted
+                date_col = next((c for c in df.columns if c.lower() == 'date'), None)
+                if date_col:
+                    # Exclude summary/average rows for Paris's individual rounds
+                    exclude_names = set(['Paris Summary', 'D1 Average', 'LPGA Tour Average'])
+                    if course_col_name:
+                        paris_df = df[~df[course_col_name].isin(exclude_names)].copy()
+                    else:
+                        paris_df = None
+                    if paris_df is not None and not paris_df.empty:
+                        try:
+                            paris_df[date_col] = pd.to_datetime(paris_df[date_col], errors='coerce')
+                            paris_df = paris_df.sort_values(date_col)
+                        except Exception:
+                            pass
+                        trend_cols = st.columns(len(metrics))
+                        for i, (metric, label) in enumerate(metrics):
+                            with trend_cols[i]:
+                                fig, ax = plt.subplots(figsize=(4, 2.5))
+                                if metric in paris_df.columns:
+                                    # Only show x-ticks for dates with data
+                                    x_dates = paris_df[date_col]
+                                    y_vals = paris_df[metric]
+                                    ax.plot(x_dates, y_vals, marker='o', color='#ff69b4', label='Paris')
+                                    ax.set_xlabel("")
+                                    ax.set_ylabel("")
+                                    ax.set_title(f'Paris {label} Trend')
+                                    ax.grid(True, linestyle='--', alpha=0.5)
+                                    # No legend for single-series trend chart
+                                    # Set x-ticks only at dates with data
+                                    ax.set_xticks(x_dates)
+                                    ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in x_dates], rotation=90, fontsize=7)
+                                    fig.tight_layout()
+                                else:
+                                    ax.text(0.5, 0.5, 'No data', ha='center', va='center')
+                                st.pyplot(fig)
+                                plt.close(fig)
 
     # --- Viz - Shots ---
     with tab_shots:
