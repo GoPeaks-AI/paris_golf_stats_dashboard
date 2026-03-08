@@ -352,7 +352,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                     ax.plot(x_dates, y_vals, marker='o', color='#ff69b4', label='Paris')
                                     ax.set_xlabel("")
                                     ax.set_ylabel("")
-                                    ax.set_title(f'Paris {label} Trend')
+                                    ax.set_title(label)
                                     ax.grid(True, linestyle='--', alpha=0.5)
                                     # No legend for single-series trend chart
                                     # Set x-ticks only at dates with data
@@ -382,6 +382,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             if green_miss_col: shots_to_show.append(green_miss_col)
             if gir_pin_col: shots_to_show.append(gir_pin_col)
             if shots_to_show:
+                st.markdown('<h4 style="margin-bottom:0.5em;">Paris vs. D1 vs. LPGA Pro</h4>', unsafe_allow_html=True)
                 cols = st.columns(len(shots_to_show))
                 order = ['Paris Summary', 'D1 Average', 'LPGA Tour Average']
                 color_map = ['#ff69b4', '#990000', '#006994']
@@ -433,6 +434,43 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                         st.pyplot(fig)
                         plt.close(fig)
 
+                # --- Second row: Paris trend lines over time ---
+                st.markdown('<h4 style="margin-bottom:0.5em;">Paris Stats Over Time</h4>', unsafe_allow_html=True)
+                date_col = next((c for c in df.columns if c.lower() == 'date'), None)
+                if date_col:
+                    exclude_names = set(['Paris Summary', 'D1 Average', 'LPGA Tour Average'])
+                    if course_col_name:
+                        paris_df = df[~df[course_col_name].isin(exclude_names)].copy()
+                    else:
+                        paris_df = None
+                    if paris_df is not None and not paris_df.empty:
+                        try:
+                            paris_df[date_col] = pd.to_datetime(paris_df[date_col], errors='coerce')
+                            paris_df = paris_df.sort_values(date_col)
+                        except Exception:
+                            pass
+                        trend_cols = st.columns(len(shots_to_show))
+                        for i, metric in enumerate(shots_to_show):
+                            with trend_cols[i]:
+                                fig, ax = plt.subplots(figsize=(4, 2.5))
+                                if metric in paris_df.columns:
+                                    x_dates = paris_df[date_col]
+                                    y_vals = paris_df[metric]
+                                    ax.plot(x_dates, y_vals, marker='o', color='#ff69b4')
+                                    ax.set_xlabel("")
+                                    ax.set_ylabel("")
+                                    # Add chart title with metric name
+                                    ax.set_title(str(metric))
+                                    ax.grid(True, linestyle='--', alpha=0.5)
+                                    # Only show x-ticks for dates with data
+                                    ax.set_xticks(x_dates)
+                                    ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in x_dates], rotation=90, fontsize=7)
+                                    fig.tight_layout()
+                                else:
+                                    ax.text(0.5, 0.5, 'No data', ha='center', va='center')
+                                st.pyplot(fig)
+                                plt.close(fig)
+
     # --- Viz - Short Game ---
     with tab_short:
         st.subheader("Short Game Visualizations")
@@ -469,6 +507,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             bar_height = 0.2
             # Create y-tick labels by removing 'Total Putts per Hole ' prefix
             yticklabels = [label.replace('Total Putts per Hole ', '') for label in putt_labels]
+            st.markdown('<h4 style="margin-bottom:0.5em;">Paris vs. D1 vs. LPGA Pro</h4>', unsafe_allow_html=True)
             cols = st.columns(5)
             # Chart 1: Total Putts per Hole
             with cols[0]:
@@ -502,7 +541,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                 ax.set_yticks([])
                 st.pyplot(fig)
                 plt.close(fig)
-            # Chart 2: Putts per Hole by Distance Range
+            # Chart 2: Putts per Hole by Distance Range (first row, bar chart)
             if n_distances > 0:
                 with cols[1]:
                     fig, ax = plt.subplots(figsize=(4, 4))
@@ -512,7 +551,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                     ax.set_yticklabels(yticklabels)
                     ax.set_xlabel('Number of Putts')
                     ax.set_ylabel('')  # Remove Y-axis title
-                    # No chart title
+                    ax.set_title('Putts per Hole by Distance')
                     for i in range(n_distances):
                         for j in range(n_groups):
                             val = data[i, j]
@@ -535,6 +574,109 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                             ax.text(x, y_pos, annotation, **text_kwargs)
                     st.pyplot(fig)
                     plt.close(fig)
+            # --- Second row: Paris trend lines over time ---
+            st.markdown('<h4 style="margin-bottom:0.5em;">Paris Stats Over Time</h4>', unsafe_allow_html=True)
+            date_col = next((c for c in df.columns if c.lower() == 'date'), None)
+            if date_col:
+                exclude_names = set(['Paris Summary', 'D1 Average', 'LPGA Tour Average'])
+                if course_col_name:
+                    paris_df = df[~df[course_col_name].isin(exclude_names)].copy()
+                else:
+                    paris_df = None
+                if paris_df is not None and not paris_df.empty:
+                    try:
+                        paris_df[date_col] = pd.to_datetime(paris_df[date_col], errors='coerce')
+                        paris_df = paris_df.sort_values(date_col)
+                    except Exception:
+                        pass
+                    trend_cols = st.columns(5)
+                    # Chart 1: Total Putts per Hole
+                    if putts_col:
+                        with trend_cols[0]:
+                            fig, ax = plt.subplots(figsize=(4, 2.5))
+                            if putts_col in paris_df.columns:
+                                ax.plot(paris_df[date_col], paris_df[putts_col], marker='o', color='#ff69b4')
+                                ax.set_xlabel("")
+                                ax.set_ylabel("")
+                                ax.set_title('Total Putts per Hole')
+                                ax.grid(True, linestyle='--', alpha=0.5)
+                                ax.set_xticks(paris_df[date_col])
+                                ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in paris_df[date_col]], rotation=90, fontsize=7)
+                                fig.tight_layout()
+                            else:
+                                ax.text(0.5, 0.5, 'No data', ha='center', va='center')
+                            st.pyplot(fig)
+                            plt.close(fig)
+                    # Chart 2: Putts per Hole by Distance Range (5 lines)
+                    if n_distances > 0:
+                        with trend_cols[1]:
+                            fig, ax = plt.subplots(figsize=(4, 2.5))
+                            line_styles = ['-', '--', '-.', ':', (0, (3, 1, 1, 1))]
+                            for i, label in enumerate(putt_labels):
+                                colname = col(label)
+                                if colname and colname in paris_df.columns:
+                                    ax.plot(paris_df[date_col], paris_df[colname], marker='o', linestyle=line_styles[i % len(line_styles)], label=yticklabels[i])
+                            ax.set_xlabel("")
+                            ax.set_ylabel("")
+                            ax.set_title('Putts per Hole by Distance')
+                            ax.grid(True, linestyle='--', alpha=0.5)
+                            ax.set_xticks(paris_df[date_col])
+                            ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in paris_df[date_col]], rotation=90, fontsize=7)
+                            ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=8)
+                            fig.tight_layout()
+                            st.pyplot(fig)
+                            plt.close(fig)
+                    # Chart 3: Up & Down %
+                    if updown_col:
+                        with trend_cols[2]:
+                            fig, ax = plt.subplots(figsize=(4, 2.5))
+                            if updown_col in paris_df.columns:
+                                ax.plot(paris_df[date_col], paris_df[updown_col], marker='o', color='#ff69b4')
+                                ax.set_xlabel("")
+                                ax.set_ylabel("")
+                                ax.set_title('Up and Down %')
+                                ax.grid(True, linestyle='--', alpha=0.5)
+                                ax.set_xticks(paris_df[date_col])
+                                ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in paris_df[date_col]], rotation=90, fontsize=7)
+                                fig.tight_layout()
+                            else:
+                                ax.text(0.5, 0.5, 'No data', ha='center', va='center')
+                            st.pyplot(fig)
+                            plt.close(fig)
+                    # Chart 4: Up & Down Distance from Pin
+                    if updown_dist_col:
+                        with trend_cols[3]:
+                            fig, ax = plt.subplots(figsize=(4, 2.5))
+                            if updown_dist_col in paris_df.columns:
+                                ax.plot(paris_df[date_col], paris_df[updown_dist_col], marker='o', color='#ff69b4')
+                                ax.set_xlabel("")
+                                ax.set_ylabel("")
+                                ax.set_title('Up & Down Distance from Pin (yds)')
+                                ax.grid(True, linestyle='--', alpha=0.5)
+                                ax.set_xticks(paris_df[date_col])
+                                ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in paris_df[date_col]], rotation=90, fontsize=7)
+                                fig.tight_layout()
+                            else:
+                                ax.text(0.5, 0.5, 'No data', ha='center', va='center')
+                            st.pyplot(fig)
+                            plt.close(fig)
+                    # Chart 5: Up & Down Miss from Pin
+                    if updown_miss_col:
+                        with trend_cols[4]:
+                            fig, ax = plt.subplots(figsize=(4, 2.5))
+                            if updown_miss_col in paris_df.columns:
+                                ax.plot(paris_df[date_col], paris_df[updown_miss_col], marker='o', color='#ff69b4')
+                                ax.set_xlabel("")
+                                ax.set_ylabel("")
+                                ax.set_title('Up & Down Miss from Pin (ft)')
+                                ax.grid(True, linestyle='--', alpha=0.5)
+                                ax.set_xticks(paris_df[date_col])
+                                ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in paris_df[date_col]], rotation=90, fontsize=7)
+                                fig.tight_layout()
+                            else:
+                                ax.text(0.5, 0.5, 'No data', ha='center', va='center')
+                            st.pyplot(fig)
+                            plt.close(fig)
             # Chart 3: Up & Down %
             if updown_col:
                 with cols[2]:
@@ -664,22 +806,25 @@ Here is a quick summary of your recent golf performance, focusing on your streng
         # Plot hole handicap vs score diff from par in first column
         if 'Hole Handicap' in df.columns and 'Score Diff from Par' in df.columns:
             fig, ax = plt.subplots(figsize=(8, 5))
-            # Color by y <= 0 (green) or > 0 (red)
             y0 = 0
             colors = df['Score Diff from Par'].apply(lambda y: 'green' if y <= y0 else 'red')
             # Add light grey shade for X >= 13
             ax.axvspan(13, 20, color='lightgrey', alpha=0.4, zorder=0)
             ax.axhline(y0, color='deepskyblue', linestyle='--', linewidth=2, alpha=0.5)
-            ax.scatter(df['Hole Handicap'], df['Score Diff from Par'], c=colors, s=40)
+            # Make dots for most recent game for Paris 2x bigger
+            s = np.full(len(df), 40)
+            if 'Date' in df.columns and 'Course' in df.columns:
+                most_recent_date = pd.to_datetime(df['Date'], errors='coerce').max()
+                mask = (pd.to_datetime(df['Date'], errors='coerce') == most_recent_date) & (df['Course'].str.contains('Paris', case=False, na=False))
+                s[mask] = 80
+            ax.scatter(df['Hole Handicap'], df['Score Diff from Par'], c=colors, s=s)
             ax.set_title('Hole Handicap vs Score Diff from Par')
             ax.set_xlabel('Hole Handicap')
             ax.set_ylabel('Score Diff from Par')
-            # X axis: integer between -2 and max positive integer in data (or 18 if all values are less)
             x_min = 1
             x_max = max(18, int(np.nanmax(df['Hole Handicap'])))
             ax.set_xlim(x_min, x_max)
             ax.set_xticks([i for i in range(x_min, x_max+1)])
-            # Y axis: integer ticks only, auto range
             y_min = -2
             y_max = int(np.ceil(np.nanmax(df['Score Diff from Par'])))
             ax.set_yticks([i for i in range(y_min, y_max+1)])
@@ -692,10 +837,14 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             fig2, ax2 = plt.subplots(figsize=(8, 5))
             y0 = 8
             colors2 = df[gir_miss_col].apply(lambda y: 'green' if y <= y0 else 'red')
-            # Add light grey shade for X <= 125
             ax2.axvspan(0, 125, color='lightgrey', alpha=0.4, zorder=0)
             ax2.axhline(y0, color='deepskyblue', linestyle='--', linewidth=2, alpha=0.5)
-            ax2.scatter(df[approach_col], df[gir_miss_col], c=colors2, s=40)
+            s2 = np.full(len(df), 40)
+            if 'Date' in df.columns and 'Course' in df.columns:
+                most_recent_date = pd.to_datetime(df['Date'], errors='coerce').max()
+                mask2 = (pd.to_datetime(df['Date'], errors='coerce') == most_recent_date) & (df['Course'].str.contains('Paris', case=False, na=False))
+                s2[mask2] = 80
+            ax2.scatter(df[approach_col], df[gir_miss_col], c=colors2, s=s2)
             ax2.set_title('Approach Distance from Pin vs GIR Miss from Green')
             ax2.set_xlabel('Approach shot distance (yds) from pin')
             ax2.set_ylabel('GIR miss from green (yds)')
@@ -710,10 +859,14 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                 fig3, ax3 = plt.subplots(figsize=(8, 5))
                 y0 = 21.5
                 colors3 = df_nonan[gir_miss_pin_col].apply(lambda y: 'green' if y <= y0 else 'red')
-                # Add light grey shade for X <= 100
                 ax3.axvspan(0, 100, color='lightgrey', alpha=0.4, zorder=0)
                 ax3.axhline(y0, color='deepskyblue', linestyle='--', linewidth=2, alpha=0.5)
-                ax3.scatter(df_nonan[approach_col], df_nonan[gir_miss_pin_col], c=colors3, s=40)
+                s3 = np.full(len(df_nonan), 40)
+                if 'Date' in df_nonan.columns and 'Course' in df_nonan.columns:
+                    most_recent_date = pd.to_datetime(df_nonan['Date'], errors='coerce').max()
+                    mask3 = (pd.to_datetime(df_nonan['Date'], errors='coerce') == most_recent_date) & (df_nonan['Course'].str.contains('Paris', case=False, na=False))
+                    s3[mask3] = 80
+                ax3.scatter(df_nonan[approach_col], df_nonan[gir_miss_pin_col], c=colors3, s=s3)
                 ax3.set_title('Approach Distance from Pin vs GIR Miss from Pin')
                 ax3.set_xlabel('Approach shot distance (yds) from pin')
                 ax3.set_ylabel('GIR miss from pin (ft)')
@@ -729,10 +882,14 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                 fig4, ax4 = plt.subplots(figsize=(8, 5))
                 y0 = 10
                 colors4 = df_updown[updown_miss_col].apply(lambda y: 'green' if y <= y0 else 'red')
-                # Add light grey shade for X <= 15
                 ax4.axvspan(0, 15, color='lightgrey', alpha=0.4, zorder=0)
                 ax4.axhline(y0, color='deepskyblue', linestyle='--', linewidth=2, alpha=0.5)
-                ax4.scatter(df_updown[updown_dist_col], df_updown[updown_miss_col], c=colors4, s=40)
+                s4 = np.full(len(df_updown), 40)
+                if 'Date' in df_updown.columns and 'Course' in df_updown.columns:
+                    most_recent_date = pd.to_datetime(df_updown['Date'], errors='coerce').max()
+                    mask4 = (pd.to_datetime(df_updown['Date'], errors='coerce') == most_recent_date) & (df_updown['Course'].str.contains('Paris', case=False, na=False))
+                    s4[mask4] = 80
+                ax4.scatter(df_updown[updown_dist_col], df_updown[updown_miss_col], c=colors4, s=s4)
                 ax4.set_title('Scramble Up & Down Distance vs Miss from Pin')
                 ax4.set_xlabel('Scramble up & down distance from pin (yds)')
                 ax4.set_ylabel('Scramble up & down miss from pin (ft)')

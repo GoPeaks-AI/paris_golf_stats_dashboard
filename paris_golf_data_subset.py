@@ -21,6 +21,7 @@ def run(csv_url):
         pd.DataFrame: A processed DataFrame with golf statistics, including
                       "Paris Summary", "D1 Average", and "LPGA Tour Average" rows.
     """
+
     df = pd.read_csv(csv_url)
 
     # 1. Generate new column names for the 18 holes
