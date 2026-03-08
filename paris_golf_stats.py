@@ -23,25 +23,20 @@ def run(csv_url):
     """
     df = pd.read_csv(csv_url)
 
-    # 1. Generate new column names for the columns after the first 8
-    num_initial_cols = 8
-    num_generated_cols = len(df.columns) - num_initial_cols
+    # 1. Generate new column names for the 18 holes
     generated_column_names = []
-    for i in range(num_generated_cols):
-        col_name = df.columns[num_initial_cols + i]
-        # Try to extract hole number and stat name if possible
-        # If the original column name contains a dot, use the part before the dot
-        modified_name = col_name.split('.')[0] if '.' in col_name else col_name
-        # Attempt to extract hole number if present in the column name
-        hole_num = (i // 20) + 1 if num_generated_cols >= 360 else ''
-        final_name = f"{hole_num} - {modified_name}" if hole_num else modified_name
-        generated_column_names.append(final_name)
+    for i in range(1, 19):
+        start_index = i * 20 - 12
+        end_index = i * 20 + 8
+        current_cols = df.columns[start_index:min(end_index, len(df.columns))]
 
-    # Ensure the generated_column_names matches the number of columns after the first 8
-    if len(generated_column_names) != num_generated_cols:
-        raise ValueError(f"Length mismatch: {len(df.columns)} columns, {num_initial_cols} initial, {len(generated_column_names)} generated")
+        for col_name in current_cols:
+            modified_name = col_name.split('.')[0] if '.' in col_name else col_name
+            final_name = f"{i} - {modified_name}"
+            generated_column_names.append(final_name)
 
-    df.columns = list(df.columns[:num_initial_cols]) + generated_column_names
+    # Assign new column names
+    df.columns = list(df.columns[:8]) + generated_column_names
 
     # Initialize new_df for individual round statistics
     # This `new_df_rounds` will contain only the raw golf round data before summaries are added.
@@ -66,6 +61,7 @@ def run(csv_url):
     total_par = df[par_cols].sum(axis=1)
 
     # Add data for "Diff from Par" for each hole, e.g., "1 - Diff from Par", etc.
+
 
     # 1. Update 'Avg Diff from Par/Hole' to 'Diff from Par'
     new_df_rounds["Diff from Par"] = new_df_rounds["Score"] - total_par
@@ -349,5 +345,6 @@ def run(csv_url):
     # Apply final rounding to all numeric columns for consistency across the entire DataFrame
     for col in final_df.select_dtypes(include=np.number).columns:
         final_df[col] = final_df[col].round(2)
+
 
     return final_df
