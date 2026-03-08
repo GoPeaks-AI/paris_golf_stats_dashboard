@@ -811,12 +811,11 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             # Add light grey shade for X >= 13
             ax.axvspan(13, 20, color='lightgrey', alpha=0.4, zorder=0)
             ax.axhline(y0, color='deepskyblue', linestyle='--', linewidth=2, alpha=0.5)
-            # Make dots for most recent game for Paris 2x bigger
-            s = np.full(len(df), 40)
-            if 'Date' in df.columns and 'Course' in df.columns:
-                most_recent_date = pd.to_datetime(df['Date'], errors='coerce').max()
-                mask = (pd.to_datetime(df['Date'], errors='coerce') == most_recent_date) & (df['Course'].str.contains('Paris', case=False, na=False))
-                s[mask] = 80
+            # Make dot size proportional to the number of overlapping points (relative frequency)
+            xy = list(zip(df['Hole Handicap'], df['Score Diff from Par']))
+            from collections import Counter
+            freq = Counter(xy)
+            s = np.array([40 * freq[(x, y)] for x, y in xy])
             ax.scatter(df['Hole Handicap'], df['Score Diff from Par'], c=colors, s=s)
             ax.set_title('Hole Handicap vs Score Diff from Par')
             ax.set_xlabel('Hole Handicap')
@@ -839,11 +838,9 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             colors2 = df[gir_miss_col].apply(lambda y: 'green' if y <= y0 else 'red')
             ax2.axvspan(0, 125, color='lightgrey', alpha=0.4, zorder=0)
             ax2.axhline(y0, color='deepskyblue', linestyle='--', linewidth=2, alpha=0.5)
-            s2 = np.full(len(df), 40)
-            if 'Date' in df.columns and 'Course' in df.columns:
-                most_recent_date = pd.to_datetime(df['Date'], errors='coerce').max()
-                mask2 = (pd.to_datetime(df['Date'], errors='coerce') == most_recent_date) & (df['Course'].str.contains('Paris', case=False, na=False))
-                s2[mask2] = 80
+            xy2 = list(zip(df[approach_col], df[gir_miss_col]))
+            freq2 = Counter(xy2)
+            s2 = np.array([40 * freq2[(x, y)] for x, y in xy2])
             ax2.scatter(df[approach_col], df[gir_miss_col], c=colors2, s=s2)
             ax2.set_title('Approach Distance from Pin vs GIR Miss from Green')
             ax2.set_xlabel('Approach shot distance (yds) from pin')
@@ -861,11 +858,9 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                 colors3 = df_nonan[gir_miss_pin_col].apply(lambda y: 'green' if y <= y0 else 'red')
                 ax3.axvspan(0, 100, color='lightgrey', alpha=0.4, zorder=0)
                 ax3.axhline(y0, color='deepskyblue', linestyle='--', linewidth=2, alpha=0.5)
-                s3 = np.full(len(df_nonan), 40)
-                if 'Date' in df_nonan.columns and 'Course' in df_nonan.columns:
-                    most_recent_date = pd.to_datetime(df_nonan['Date'], errors='coerce').max()
-                    mask3 = (pd.to_datetime(df_nonan['Date'], errors='coerce') == most_recent_date) & (df_nonan['Course'].str.contains('Paris', case=False, na=False))
-                    s3[mask3] = 80
+                xy3 = list(zip(df_nonan[approach_col], df_nonan[gir_miss_pin_col]))
+                freq3 = Counter(xy3)
+                s3 = np.array([40 * freq3[(x, y)] for x, y in xy3])
                 ax3.scatter(df_nonan[approach_col], df_nonan[gir_miss_pin_col], c=colors3, s=s3)
                 ax3.set_title('Approach Distance from Pin vs GIR Miss from Pin')
                 ax3.set_xlabel('Approach shot distance (yds) from pin')
@@ -884,11 +879,9 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                 colors4 = df_updown[updown_miss_col].apply(lambda y: 'green' if y <= y0 else 'red')
                 ax4.axvspan(0, 15, color='lightgrey', alpha=0.4, zorder=0)
                 ax4.axhline(y0, color='deepskyblue', linestyle='--', linewidth=2, alpha=0.5)
-                s4 = np.full(len(df_updown), 40)
-                if 'Date' in df_updown.columns and 'Course' in df_updown.columns:
-                    most_recent_date = pd.to_datetime(df_updown['Date'], errors='coerce').max()
-                    mask4 = (pd.to_datetime(df_updown['Date'], errors='coerce') == most_recent_date) & (df_updown['Course'].str.contains('Paris', case=False, na=False))
-                    s4[mask4] = 80
+                xy4 = list(zip(df_updown[updown_dist_col], df_updown[updown_miss_col]))
+                freq4 = Counter(xy4)
+                s4 = np.array([40 * freq4[(x, y)] for x, y in xy4])
                 ax4.scatter(df_updown[updown_dist_col], df_updown[updown_miss_col], c=colors4, s=s4)
                 ax4.set_title('Scramble Up & Down Distance vs Miss from Pin')
                 ax4.set_xlabel('Scramble up & down distance from pin (yds)')
