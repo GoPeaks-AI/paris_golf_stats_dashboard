@@ -23,20 +23,23 @@ def run(csv_url):
     """
     df = pd.read_csv(csv_url)
 
-    # 1. Generate new column names for the 18 holes
+    # 1. Generate new column names for the columns after the first 8
+    num_initial_cols = 8
+    num_generated_cols = len(df.columns) - num_initial_cols
     generated_column_names = []
-    for i in range(1, 19):
-        start_index = i * 20 - 12
-        end_index = i * 20 + 8
-        current_cols = df.columns[start_index:min(end_index, len(df.columns))]
+    for i in range(num_generated_cols):
+        col_name = df.columns[num_initial_cols + i]
+        # Try to extract hole number and stat name if possible
+        modified_name = col_name.split('.')[0] if '.' in col_name else col_name
+        hole_num = (i // 20) + 1 if num_generated_cols >= 360 else ''
+        final_name = f"{hole_num} - {modified_name}" if hole_num else modified_name
+        generated_column_names.append(final_name)
 
-        for col_name in current_cols:
-            modified_name = col_name.split('.')[0] if '.' in col_name else col_name
-            final_name = f"{i} - {modified_name}"
-            generated_column_names.append(final_name)
+    # Ensure the generated_column_names matches the number of columns after the first 8
+    if len(generated_column_names) != num_generated_cols:
+        raise ValueError(f"Length mismatch: {len(df.columns)} columns, {num_initial_cols} initial, {len(generated_column_names)} generated")
 
-    # Assign new column names
-    df.columns = list(df.columns[:8]) + generated_column_names
+    df.columns = list(df.columns[:num_initial_cols]) + generated_column_names
 
     # --- Extract and compile per-hole data into long format ---
     long_data = []
