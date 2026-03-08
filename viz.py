@@ -102,8 +102,8 @@ def main():
                 {
                     'label': 'Shots',
                     'metrics': [
-                        ('FIR %', 'Fairways in Regulation %'),
-                        ('GIR %', 'Greens in Regulation %'),
+                        ('FIR %', 'FIR %'),
+                        ('GIR %', 'GIR %'),
                         ('Avg Approach Distance (yds) from Pin', 'Approach Distance to Pin (yds)'),
                         ('Avg GIR Green Miss (yds)', 'GIR Green Miss (yds)'),
                         ('Avg GIR Pin Miss (ft)', 'GIR Pin Miss (ft)')
@@ -217,6 +217,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
 
             letter += "\nKeep up the great work and let's keep improving together!\n\n-Your AI Assistant Coach 🏌️‍♀️"
             st.markdown(letter, unsafe_allow_html=True)
+
     with tab1:
         st.subheader("Table")
         course_col = next((c for c in df.columns if c.lower() == 'course'), None)
