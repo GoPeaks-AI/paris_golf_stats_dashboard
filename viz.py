@@ -382,8 +382,8 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                             node_colors.append('#ff69b4')
                                     # Plot colored segments
                                     for j in range(len(x_dates)-1):
-                                        # Use color of the right node (later date)
-                                        ax.plot(x_dates[j:j+2], y_vals[j:j+2], color=node_colors[j+1], linewidth=2)
+                                        # Thin pink line for Paris segments
+                                        ax.plot(x_dates[j:j+2], y_vals[j:j+2], color='#ff69b4', linewidth=1)
                                     for j in range(len(x_dates)):
                                         ax.plot(x_dates[j], y_vals[j], marker='o', color=node_colors[j], markersize=8)
                                     ax.set_xlabel("")
@@ -540,7 +540,8 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                             node_colors.append('#ff69b4')
                                     # Plot colored segments
                                     for j in range(len(x_dates)-1):
-                                        ax.plot(x_dates[j:j+2], y_vals[j:j+2], color=node_colors[j+1], linewidth=2)
+                                        # Thin pink line for Paris segments
+                                        ax.plot(x_dates[j:j+2], y_vals[j:j+2], color='#ff69b4', linewidth=1)
                                     for j in range(len(x_dates)):
                                         ax.plot(x_dates[j], y_vals[j], marker='o', color=node_colors[j], markersize=8)
                                     ax.set_xlabel("")
@@ -712,7 +713,8 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                         line_colors.append('#ff69b4')
                                         node_colors.append('#ff69b4')
                                 for j in range(len(x_dates)-1):
-                                    ax.plot(x_dates[j:j+2], y_vals[j:j+2], color=node_colors[j+1], linewidth=2)
+                                    # Thin pink line for Paris segments
+                                    ax.plot(x_dates[j:j+2], y_vals[j:j+2], color='#ff69b4', linewidth=1)
                                 for j in range(len(x_dates)):
                                     ax.plot(x_dates[j], y_vals[j], marker='o', color=node_colors[j], markersize=8)
                                 ax.set_xlabel("")
@@ -770,7 +772,8 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                         line_colors.append('#ff69b4')
                                         node_colors.append('#ff69b4')
                                 for j in range(len(x_dates)-1):
-                                    ax.plot(x_dates[j:j+2], y_vals[j:j+2], color=node_colors[j+1], linewidth=2)
+                                    # Thin pink line for Paris segments
+                                    ax.plot(x_dates[j:j+2], y_vals[j:j+2], color='#ff69b4', linewidth=1)
                                 for j in range(len(x_dates)):
                                     ax.plot(x_dates[j], y_vals[j], marker='o', color=node_colors[j], markersize=8)
                                 ax.set_xlabel("")
@@ -809,7 +812,8 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                         line_colors.append('#ff69b4')
                                         node_colors.append('#ff69b4')
                                 for j in range(len(x_dates)-1):
-                                    ax.plot(x_dates[j:j+2], y_vals[j:j+2], color=node_colors[j+1], linewidth=2)
+                                    # Thin pink line for Paris segments
+                                    ax.plot(x_dates[j:j+2], y_vals[j:j+2], color='#ff69b4', linewidth=1)
                                 for j in range(len(x_dates)):
                                     ax.plot(x_dates[j], y_vals[j], marker='o', color=node_colors[j], markersize=8)
                                 ax.set_xlabel("")
@@ -848,7 +852,8 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                         line_colors.append('#ff69b4')
                                         node_colors.append('#ff69b4')
                                 for j in range(len(x_dates)-1):
-                                    ax.plot(x_dates[j:j+2], y_vals[j:j+2], color=line_colors[j], linewidth=2)
+                                    # Thin pink line for Paris segments
+                                    ax.plot(x_dates[j:j+2], y_vals[j:j+2], color='#ff69b4', linewidth=1)
                                 for j in range(len(x_dates)):
                                     ax.plot(x_dates[j], y_vals[j], marker='o', color=node_colors[j], markersize=8)
                                 ax.set_xlabel("")
