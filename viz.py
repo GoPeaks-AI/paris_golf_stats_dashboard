@@ -275,7 +275,6 @@ Here is a quick summary of your recent golf performance, focusing on your streng
     with tab_score:
 
         st.subheader("Score Differential Visualizations")
-        show_color_legend()
 
         if comparison_df is not None:
             metrics = [
@@ -287,6 +286,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             metrics = [(m, label) for m, label in metrics if m]
             if metrics:
                 st.markdown('<h4 style="margin-bottom:0.5em;">Paris vs. D1 vs. LPGA Pro</h4>', unsafe_allow_html=True)
+                show_color_legend()
                 cols = st.columns(len(metrics))
                 order = ['Paris Summary', 'D1 Average', 'LPGA Tour Average']
                 color_map = ['#ff69b4', '#990000', '#006994']
@@ -367,7 +367,6 @@ Here is a quick summary of your recent golf performance, focusing on your streng
     # --- Viz - Shots ---
     with tab_shots:
         st.subheader("Shots Visualizations")
-        show_color_legend()
         if comparison_df is not None:
             fir_col = col('FIR %')
             approach_col = col('Avg Approach Distance (yds) from Pin')
@@ -383,6 +382,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             if gir_pin_col: shots_to_show.append(gir_pin_col)
             if shots_to_show:
                 st.markdown('<h4 style="margin-bottom:0.5em;">Paris vs. D1 vs. LPGA Pro</h4>', unsafe_allow_html=True)
+                show_color_legend()
                 cols = st.columns(len(shots_to_show))
                 order = ['Paris Summary', 'D1 Average', 'LPGA Tour Average']
                 color_map = ['#ff69b4', '#990000', '#006994']
@@ -474,7 +474,6 @@ Here is a quick summary of your recent golf performance, focusing on your streng
     # --- Viz - Short Game ---
     with tab_short:
         st.subheader("Short Game Visualizations")
-        show_color_legend()
         if comparison_df is not None:
             putts_col = col('Total Putts per Hole')
             updown_col = col('Up and Down %')
@@ -508,6 +507,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             # Create y-tick labels by removing 'Total Putts per Hole ' prefix
             yticklabels = [label.replace('Total Putts per Hole ', '') for label in putt_labels]
             st.markdown('<h4 style="margin-bottom:0.5em;">Paris vs. D1 vs. LPGA Pro</h4>', unsafe_allow_html=True)
+            show_color_legend()
             cols = st.columns(5)
             # Chart 1: Total Putts per Hole
             with cols[0]:
