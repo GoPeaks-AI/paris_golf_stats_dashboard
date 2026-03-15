@@ -328,14 +328,19 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                 st.markdown('<h4 style="margin-bottom:0.5em;">Paris Stats Over Time</h4>', unsafe_allow_html=True)
                 # Filter for Paris only, and ensure date is sorted
                 date_col = next((c for c in df.columns if c.lower() == 'date'), None)
-                # Add legend explanation for color/line schema
-                st.markdown(
-                    '<div style="font-size:0.95em;margin-bottom:0.5em;">'
-                    '<b>Legend:</b> '
-                    '<span style="color:#ff69b4;font-weight:bold;">Paris</span> (pink line), '
-                    '<span style="color:#006994;font-weight:bold;">D1 Target</span> (blue dashed line)</div>',
-                    unsafe_allow_html=True
-                )
+                # Legend row at the top, centered
+                legend_cols = st.columns([1, 1, 1])
+                with legend_cols[1]:
+                    import matplotlib.lines as mlines
+                    blue_line = mlines.Line2D([], [], color='deepskyblue', linestyle='--', linewidth=2, label='Target')
+                    red_dot = mlines.Line2D([], [], color='red', marker='o', linestyle='None', markersize=10, label='Miss Target')
+                    green_dot = mlines.Line2D([], [], color='green', marker='o', linestyle='None', markersize=10, label='Match/Exceed Target')
+                    fig_legend, ax_legend = plt.subplots(figsize=(5, 0.5))
+                    ax_legend.axis('off')
+                    handles = [blue_line, red_dot, green_dot]
+                    ax_legend.legend(handles=handles, loc='center', ncol=3, frameon=False, fontsize=12)
+                    st.pyplot(fig_legend)
+                    plt.close(fig_legend)
                 if date_col:
                     # Exclude summary/average rows for Paris's individual rounds
                     exclude_names = set(['Paris Summary', 'D1 Average', 'LPGA Tour Average'])
@@ -356,11 +361,31 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                 if metric in paris_df.columns:
                                     x_dates = paris_df[date_col]
                                     y_vals = paris_df[metric]
-                                    ax.plot(x_dates, y_vals, marker='o', color='#ff69b4', label='Paris')
-                                    # Add blue dashed horizontal line for D1 Average
+                                    # Get D1 Average for comparison
+                                    d1_avg = None
                                     if metric in comparison_df.columns:
                                         d1_avg = comparison_df[comparison_df[course_col_name]=='D1 Average'][metric].values[0]
-                                        ax.axhline(d1_avg, color='#006994', linestyle='--', linewidth=2, label='D1 Target')
+                                        ax.axhline(d1_avg, color='deepskyblue', linestyle='--', linewidth=2, label='D1 Target')
+                                    # Determine color for each segment/node
+                                    line_colors = []
+                                    node_colors = []
+                                    for y in y_vals:
+                                        if d1_avg is not None:
+                                            if y > d1_avg:
+                                                line_colors.append('red')
+                                                node_colors.append('red')
+                                            else:
+                                                line_colors.append('green')
+                                                node_colors.append('green')
+                                        else:
+                                            line_colors.append('#ff69b4')
+                                            node_colors.append('#ff69b4')
+                                    # Plot colored segments
+                                    for j in range(len(x_dates)-1):
+                                        # Use color of the right node (later date)
+                                        ax.plot(x_dates[j:j+2], y_vals[j:j+2], color=node_colors[j+1], linewidth=2)
+                                    for j in range(len(x_dates)):
+                                        ax.plot(x_dates[j], y_vals[j], marker='o', color=node_colors[j], markersize=8)
                                     ax.set_xlabel("")
                                     ax.set_ylabel("")
                                     ax.set_title(label)
@@ -446,14 +471,19 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                 # --- Second row: Paris trend lines over time ---
                 st.markdown('<h4 style="margin-bottom:0.5em;">Paris Stats Over Time</h4>', unsafe_allow_html=True)
                 date_col = next((c for c in df.columns if c.lower() == 'date'), None)
-                # Add legend explanation for Paris pink line and blue dash line
-                st.markdown(
-                    '<div style="font-size:0.95em;margin-bottom:0.5em;">'
-                    '<b>Legend:</b> '
-                    '<span style="color:#ff69b4;font-weight:bold;">Paris</span> (pink line), '
-                    '<span style="color:#006994;font-weight:bold;">D1 Target</span> (blue dashed line)</div>',
-                    unsafe_allow_html=True
-                )
+                # Add legend explanation for Paris line (red miss, green match/exceed), and deepskyblue dash line (target)
+                legend_cols = st.columns([1, 1, 1])
+                with legend_cols[1]:
+                    import matplotlib.lines as mlines
+                    blue_line = mlines.Line2D([], [], color='deepskyblue', linestyle='--', linewidth=2, label='Target')
+                    red_dot = mlines.Line2D([], [], color='red', marker='o', linestyle='None', markersize=10, label='Miss Target')
+                    green_dot = mlines.Line2D([], [], color='green', marker='o', linestyle='None', markersize=10, label='Match/Exceed Target')
+                    fig_legend, ax_legend = plt.subplots(figsize=(5, 0.5))
+                    ax_legend.axis('off')
+                    handles = [blue_line, red_dot, green_dot]
+                    ax_legend.legend(handles=handles, loc='center', ncol=3, frameon=False, fontsize=12)
+                    st.pyplot(fig_legend)
+                    plt.close(fig_legend)
                 if date_col:
                     exclude_names = set(['Paris Summary', 'D1 Average', 'LPGA Tour Average'])
                     if course_col_name:
@@ -473,14 +503,49 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                 if metric in paris_df.columns:
                                     x_dates = paris_df[date_col]
                                     y_vals = paris_df[metric]
-                                    ax.plot(x_dates, y_vals, marker='o', color='#ff69b4')
-                                    # Add blue dashed horizontal line for D1 Average
+                                    # Get D1 Average for comparison
+                                    d1_avg = None
                                     if metric in comparison_df.columns:
                                         d1_avg = comparison_df[comparison_df[course_col_name]=='D1 Average'][metric].values[0]
-                                        ax.axhline(d1_avg, color='#006994', linestyle='--', linewidth=2, label='D1 Target')
+                                        ax.axhline(d1_avg, color='deepskyblue', linestyle='--', linewidth=2, label='D1 Target')
+                                    # Determine color for each segment/node
+                                    metric_name = metric if isinstance(metric, str) else ''
+                                    fir_gir_metrics = ['FIR %', 'GIR %']
+                                    for colname in df.columns:
+                                        if df[colname].equals(df[metric]):
+                                            metric_name = colname
+                                            break
+                                    line_colors = []
+                                    node_colors = []
+                                    for y in y_vals:
+                                        if d1_avg is not None:
+                                            if metric_name in fir_gir_metrics:
+                                                # FIR % and GIR %: green if at/above, red if below
+                                                if y >= d1_avg:
+                                                    line_colors.append('green')
+                                                    node_colors.append('green')
+                                                else:
+                                                    line_colors.append('red')
+                                                    node_colors.append('red')
+                                            else:
+                                                # Other metrics: red if above, green if at/below
+                                                if y > d1_avg:
+                                                    line_colors.append('red')
+                                                    node_colors.append('red')
+                                                else:
+                                                    line_colors.append('green')
+                                                    node_colors.append('green')
+                                        else:
+                                            line_colors.append('#ff69b4')
+                                            node_colors.append('#ff69b4')
+                                    # Plot colored segments
+                                    for j in range(len(x_dates)-1):
+                                        ax.plot(x_dates[j:j+2], y_vals[j:j+2], color=node_colors[j+1], linewidth=2)
+                                    for j in range(len(x_dates)):
+                                        ax.plot(x_dates[j], y_vals[j], marker='o', color=node_colors[j], markersize=8)
                                     ax.set_xlabel("")
                                     ax.set_ylabel("")
-                                    ax.set_title(str(metric))
+                                    ax.set_title(str(metric_name))
                                     ax.grid(True, linestyle='--', alpha=0.5)
                                     ax.set_xticks(x_dates)
                                     ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in x_dates], rotation=90, fontsize=7)
@@ -596,14 +661,19 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             # --- Second row: Paris trend lines over time ---
             st.markdown('<h4 style="margin-bottom:0.5em;">Paris Stats Over Time</h4>', unsafe_allow_html=True)
             date_col = next((c for c in df.columns if c.lower() == 'date'), None)
-            # Add legend explanation for Paris pink line and blue dash line
-            st.markdown(
-                '<div style="font-size:0.95em;margin-bottom:0.5em;">'
-                '<b>Legend:</b> '
-                '<span style="color:#ff69b4;font-weight:bold;">Paris</span> (pink line), '
-                '<span style="color:#006994;font-weight:bold;">D1 Target</span> (blue dashed line)</div>',
-                unsafe_allow_html=True
-            )
+            # Add legend explanation for Paris line (red miss, green match/exceed), and deepskyblue dash line (target)
+            legend_cols = st.columns([1, 1, 1])
+            with legend_cols[1]:
+                import matplotlib.lines as mlines
+                blue_line = mlines.Line2D([], [], color='deepskyblue', linestyle='--', linewidth=2, label='Target')
+                red_dot = mlines.Line2D([], [], color='red', marker='o', linestyle='None', markersize=10, label='Miss Target')
+                green_dot = mlines.Line2D([], [], color='green', marker='o', linestyle='None', markersize=10, label='Match/Exceed Target')
+                fig_legend, ax_legend = plt.subplots(figsize=(5, 0.5))
+                ax_legend.axis('off')
+                handles = [blue_line, red_dot, green_dot]
+                ax_legend.legend(handles=handles, loc='center', ncol=3, frameon=False, fontsize=12)
+                st.pyplot(fig_legend)
+                plt.close(fig_legend)
             if date_col:
                 exclude_names = set(['Paris Summary', 'D1 Average', 'LPGA Tour Average'])
                 if course_col_name:
@@ -622,17 +692,35 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                         with trend_cols[0]:
                             fig, ax = plt.subplots(figsize=(4, 2.5))
                             if putts_col in paris_df.columns:
-                                ax.plot(paris_df[date_col], paris_df[putts_col], marker='o', color='#ff69b4')
-                                # Add blue dashed horizontal line for D1 Average
+                                x_dates = paris_df[date_col]
+                                y_vals = paris_df[putts_col]
+                                d1_avg = None
                                 if putts_col in comparison_df.columns:
                                     d1_avg = comparison_df[comparison_df[course_col_name]=='D1 Average'][putts_col].values[0]
-                                    ax.axhline(d1_avg, color='#006994', linestyle='--', linewidth=2, label='D1 Target')
+                                    ax.axhline(d1_avg, color='deepskyblue', linestyle='--', linewidth=2, label='D1 Target')
+                                line_colors = []
+                                node_colors = []
+                                for y in y_vals:
+                                    if d1_avg is not None:
+                                        if y > d1_avg:
+                                            line_colors.append('red')
+                                            node_colors.append('red')
+                                        else:
+                                            line_colors.append('green')
+                                            node_colors.append('green')
+                                    else:
+                                        line_colors.append('#ff69b4')
+                                        node_colors.append('#ff69b4')
+                                for j in range(len(x_dates)-1):
+                                    ax.plot(x_dates[j:j+2], y_vals[j:j+2], color=node_colors[j+1], linewidth=2)
+                                for j in range(len(x_dates)):
+                                    ax.plot(x_dates[j], y_vals[j], marker='o', color=node_colors[j], markersize=8)
                                 ax.set_xlabel("")
                                 ax.set_ylabel("")
                                 ax.set_title('Total Putts per Hole')
                                 ax.grid(True, linestyle='--', alpha=0.5)
-                                ax.set_xticks(paris_df[date_col])
-                                ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in paris_df[date_col]], rotation=90, fontsize=7)
+                                ax.set_xticks(x_dates)
+                                ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in x_dates], rotation=90, fontsize=7)
                                 fig.tight_layout()
                             else:
                                 ax.text(0.5, 0.5, 'No data', ha='center', va='center')
@@ -662,17 +750,35 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                         with trend_cols[2]:
                             fig, ax = plt.subplots(figsize=(4, 2.5))
                             if updown_col in paris_df.columns:
-                                ax.plot(paris_df[date_col], paris_df[updown_col], marker='o', color='#ff69b4')
-                                # Add blue dashed horizontal line for D1 Average
+                                x_dates = paris_df[date_col]
+                                y_vals = paris_df[updown_col]
+                                d1_avg = None
                                 if updown_col in comparison_df.columns:
                                     d1_avg = comparison_df[comparison_df[course_col_name]=='D1 Average'][updown_col].values[0]
-                                    ax.axhline(d1_avg, color='#006994', linestyle='--', linewidth=2, label='D1 Target')
+                                    ax.axhline(d1_avg, color='deepskyblue', linestyle='--', linewidth=2, label='D1 Target')
+                                line_colors = []
+                                node_colors = []
+                                for y in y_vals:
+                                    if d1_avg is not None:
+                                        if y >= d1_avg:
+                                            line_colors.append('green')
+                                            node_colors.append('green')
+                                        else:
+                                            line_colors.append('red')
+                                            node_colors.append('red')
+                                    else:
+                                        line_colors.append('#ff69b4')
+                                        node_colors.append('#ff69b4')
+                                for j in range(len(x_dates)-1):
+                                    ax.plot(x_dates[j:j+2], y_vals[j:j+2], color=node_colors[j+1], linewidth=2)
+                                for j in range(len(x_dates)):
+                                    ax.plot(x_dates[j], y_vals[j], marker='o', color=node_colors[j], markersize=8)
                                 ax.set_xlabel("")
                                 ax.set_ylabel("")
                                 ax.set_title('Up and Down %')
                                 ax.grid(True, linestyle='--', alpha=0.5)
-                                ax.set_xticks(paris_df[date_col])
-                                ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in paris_df[date_col]], rotation=90, fontsize=7)
+                                ax.set_xticks(x_dates)
+                                ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in x_dates], rotation=90, fontsize=7)
                                 fig.tight_layout()
                             else:
                                 ax.text(0.5, 0.5, 'No data', ha='center', va='center')
@@ -683,17 +789,35 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                         with trend_cols[3]:
                             fig, ax = plt.subplots(figsize=(4, 2.5))
                             if updown_dist_col in paris_df.columns:
-                                ax.plot(paris_df[date_col], paris_df[updown_dist_col], marker='o', color='#ff69b4')
-                                # Add blue dashed horizontal line for D1 Average
+                                x_dates = paris_df[date_col]
+                                y_vals = paris_df[updown_dist_col]
+                                d1_avg = None
                                 if updown_dist_col in comparison_df.columns:
                                     d1_avg = comparison_df[comparison_df[course_col_name]=='D1 Average'][updown_dist_col].values[0]
-                                    ax.axhline(d1_avg, color='#006994', linestyle='--', linewidth=2, label='D1 Target')
+                                    ax.axhline(d1_avg, color='deepskyblue', linestyle='--', linewidth=2, label='D1 Target')
+                                line_colors = []
+                                node_colors = []
+                                for y in y_vals:
+                                    if d1_avg is not None:
+                                        if y > d1_avg:
+                                            line_colors.append('red')
+                                            node_colors.append('red')
+                                        else:
+                                            line_colors.append('green')
+                                            node_colors.append('green')
+                                    else:
+                                        line_colors.append('#ff69b4')
+                                        node_colors.append('#ff69b4')
+                                for j in range(len(x_dates)-1):
+                                    ax.plot(x_dates[j:j+2], y_vals[j:j+2], color=node_colors[j+1], linewidth=2)
+                                for j in range(len(x_dates)):
+                                    ax.plot(x_dates[j], y_vals[j], marker='o', color=node_colors[j], markersize=8)
                                 ax.set_xlabel("")
                                 ax.set_ylabel("")
                                 ax.set_title('Up & Down Distance from Pin (yds)')
                                 ax.grid(True, linestyle='--', alpha=0.5)
-                                ax.set_xticks(paris_df[date_col])
-                                ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in paris_df[date_col]], rotation=90, fontsize=7)
+                                ax.set_xticks(x_dates)
+                                ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in x_dates], rotation=90, fontsize=7)
                                 fig.tight_layout()
                             else:
                                 ax.text(0.5, 0.5, 'No data', ha='center', va='center')
@@ -704,17 +828,35 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                         with trend_cols[4]:
                             fig, ax = plt.subplots(figsize=(4, 2.5))
                             if updown_miss_col in paris_df.columns:
-                                ax.plot(paris_df[date_col], paris_df[updown_miss_col], marker='o', color='#ff69b4')
-                                # Add blue dashed horizontal line for D1 Average
+                                x_dates = paris_df[date_col]
+                                y_vals = paris_df[updown_miss_col]
+                                d1_avg = None
                                 if updown_miss_col in comparison_df.columns:
                                     d1_avg = comparison_df[comparison_df[course_col_name]=='D1 Average'][updown_miss_col].values[0]
-                                    ax.axhline(d1_avg, color='#006994', linestyle='--', linewidth=2, label='D1 Target')
+                                    ax.axhline(d1_avg, color='deepskyblue', linestyle='--', linewidth=2, label='D1 Target')
+                                line_colors = []
+                                node_colors = []
+                                for y in y_vals:
+                                    if d1_avg is not None:
+                                        if y > d1_avg:
+                                            line_colors.append('red')
+                                            node_colors.append('red')
+                                        else:
+                                            line_colors.append('green')
+                                            node_colors.append('green')
+                                    else:
+                                        line_colors.append('#ff69b4')
+                                        node_colors.append('#ff69b4')
+                                for j in range(len(x_dates)-1):
+                                    ax.plot(x_dates[j:j+2], y_vals[j:j+2], color=line_colors[j], linewidth=2)
+                                for j in range(len(x_dates)):
+                                    ax.plot(x_dates[j], y_vals[j], marker='o', color=node_colors[j], markersize=8)
                                 ax.set_xlabel("")
                                 ax.set_ylabel("")
                                 ax.set_title('Up & Down Miss from Pin (ft)')
                                 ax.grid(True, linestyle='--', alpha=0.5)
-                                ax.set_xticks(paris_df[date_col])
-                                ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in paris_df[date_col]], rotation=90, fontsize=7)
+                                ax.set_xticks(x_dates)
+                                ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in x_dates], rotation=90, fontsize=7)
                                 fig.tight_layout()
                             else:
                                 ax.text(0.5, 0.5, 'No data', ha='center', va='center')
