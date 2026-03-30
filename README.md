@@ -1,2 +1,2 @@
 # paris_golf_stats_dashboard
-Paris Golf Play Stats
+Paris Golf Game Stats and Viz
