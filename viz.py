@@ -753,33 +753,36 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                             st.pyplot(fig)
                             plt.close(fig)
                     # Chart 2: Putts per Hole by Distance Range (5 lines) -- NO D1 line
-                    if n_distances > 0:
-                        with trend_cols[1]:
-                            fig, ax = plt.subplots(figsize=(4, 2.5))
-                            line_styles = ['-', '--', '-.', ':', (0, (3, 1, 1, 1))]
-                            mode_col = next((c for c in paris_df.columns if c.lower() == 'mode'), None)
-                            for i, label in enumerate(putt_labels):
-                                colname = col(label)
-                                if colname and colname in paris_df.columns:
-                                    for j, (x, y) in enumerate(zip(paris_df[date_col], paris_df[colname])):
-                                        marker_style = 'o'
-                                        if mode_col and str(paris_df.iloc[j][mode_col]).strip().lower() == 'tournament':
-                                            marker_style = "*"
-                                        # Only add label for the first point to avoid duplicate legend entries
-                                        ax.plot(x, y, marker=marker_style, linestyle=line_styles[i % len(line_styles)], label=yticklabels[i] if j == 0 else "")
-                            handles, labels = ax.get_legend_handles_labels()
-                            by_label = dict(zip(labels, handles))
-                            ax.legend(by_label.values(), by_label.keys(), loc='center left', bbox_to_anchor=(1, 0.5), fontsize=8)
-                            ax.set_xlabel("")
-                            ax.set_ylabel("")
-                            ax.set_title('Putts per Hole by Distance')
-                            ax.grid(True, linestyle='--', alpha=0.5)
-                            ax.set_xticks(paris_df[date_col])
-                            ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in paris_df[date_col]], rotation=90, fontsize=7)
-                            ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=8)
-                            fig.tight_layout()
-                            st.pyplot(fig)
-                            plt.close(fig)
+                    # Empty the second column, leave blank space
+                    # if n_distances > 0:
+                    #     with trend_cols[1]:
+                    #         fig, ax = plt.subplots(figsize=(4, 2.5))
+                    #         line_styles = ['-', '--', '-.', ':', (0, (3, 1, 1, 1))]
+                    #         mode_col = next((c for c in paris_df.columns if c.lower() == 'mode'), None)
+                    #         for i, label in enumerate(putt_labels):
+                    #             colname = col(label)
+                    #             if colname and colname in paris_df.columns:
+                    #                 # Plot the connecting line first
+                    #                 ax.plot(paris_df[date_col], paris_df[colname], linestyle=line_styles[i % len(line_styles)], linewidth=1, label=yticklabels[i])
+                    #                 # Then plot markers on top
+                    #                 for j in range(len(paris_df)):
+                    #                     marker_style = 'o'
+                    #                     if mode_col and str(paris_df.iloc[j][mode_col]).strip().lower() == 'tournament':
+                    #                         marker_style = "s"
+                    #                     ax.plot(paris_df[date_col].iloc[j], paris_df[colname].iloc[j], marker=marker_style, linestyle='None', markersize=8)
+                    #         handles, labels = ax.get_legend_handles_labels()
+                    #         by_label = dict(zip(labels, handles))
+                    #         ax.legend(by_label.values(), by_label.keys(), loc='center left', bbox_to_anchor=(1, 0.5), fontsize=8)
+                    #         ax.set_xlabel("")
+                    #         ax.set_ylabel("")
+                    #         ax.set_title('Putts per Hole by Distance')
+                    #         ax.grid(True, linestyle='--', alpha=0.5)
+                    #         ax.set_xticks(paris_df[date_col])
+                    #         ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in paris_df[date_col]], rotation=90, fontsize=7)
+                    #         ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=8)
+                    #         fig.tight_layout()
+                    #         st.pyplot(fig)
+                    #         plt.close(fig)
                     # Chart 3: Up & Down %
                     if updown_col:
                         with trend_cols[2]:
@@ -905,6 +908,49 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                 ax.text(0.5, 0.5, 'No data', ha='center', va='center')
                             st.pyplot(fig)
                             plt.close(fig)
+
+                    # New row for individual putt distance charts
+                    new_trend_cols = st.columns(5)
+                    for i in range(5):
+                        with new_trend_cols[i]:
+                            label = putt_labels[i]
+                            colname = col(label)
+                            if colname and colname in paris_df.columns:
+                                fig, ax = plt.subplots(figsize=(4, 2.5))
+                                # Get D1 average for target line
+                                d1_avg = None
+                                if colname in comparison_df.columns:
+                                    d1_avg = comparison_df[comparison_df[course_col_name]=='D1 Average'][colname].values[0]
+                                    ax.axhline(d1_avg, color='crimson', linestyle='--', linewidth=2, label='D1 Target')
+                                # Determine marker colors based on D1 benchmark
+                                node_colors = []
+                                for y in paris_df[colname]:
+                                    if d1_avg is not None:
+                                        if y > d1_avg:
+                                            node_colors.append('red')
+                                        else:
+                                            node_colors.append('green')
+                                    else:
+                                        node_colors.append('#ff69b4')
+                                # Plot the connecting line
+                                ax.plot(paris_df[date_col], paris_df[colname], linestyle='-', linewidth=1, color='#ff69b4')
+                                # Then plot markers
+                                mode_col = next((c for c in paris_df.columns if c.lower() == 'mode'), None)
+                                for j in range(len(paris_df)):
+                                    marker_style = 'o'
+                                    if mode_col and str(paris_df.iloc[j][mode_col]).strip().lower() == 'tournament':
+                                        marker_style = "s"
+                                    ax.plot(paris_df[date_col].iloc[j], paris_df[colname].iloc[j], marker=marker_style, linestyle='None', markersize=8, color=node_colors[j])
+                                ax.set_xlabel("")
+                                ax.set_ylabel("")
+                                ax.set_title("Putts per Hole " + yticklabels[i])
+                                ax.grid(True, linestyle='--', alpha=0.5)
+                                ax.set_xticks(paris_df[date_col])
+                                ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in paris_df[date_col]], rotation=90, fontsize=7)
+                                fig.tight_layout()
+                                st.pyplot(fig)
+                                plt.close(fig)
+
             # Chart 3: Up & Down %
             if updown_col:
                 with cols[2]:
