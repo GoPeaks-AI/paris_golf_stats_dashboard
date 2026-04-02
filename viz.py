@@ -329,16 +329,19 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                 # Filter for Paris only, and ensure date is sorted
                 date_col = next((c for c in df.columns if c.lower() == 'date'), None)
                 # Legend row at the top, centered
-                legend_cols = st.columns([1, 1, 1])
+                legend_cols = st.columns([1, 3, 1])
                 with legend_cols[1]:
                     import matplotlib.lines as mlines
                     blue_line = mlines.Line2D([], [], color='crimson', linestyle='--', linewidth=2, label='Target (D1)')
-                    red_dot = mlines.Line2D([], [], color='red', marker='o', linestyle='None', markersize=10, label='Miss Target')
-                    green_dot = mlines.Line2D([], [], color='green', marker='o', linestyle='None', markersize=10, label='Match/Exceed Target')
-                    fig_legend, ax_legend = plt.subplots(figsize=(5, 0.5))
+                    # Four new legend markers
+                    red_o = mlines.Line2D([], [], color='red', marker='o', linestyle='None', markersize=10, label='Miss target in practice')
+                    red_s = mlines.Line2D([], [], color='red', marker="*", linestyle='None', markersize=10, label='Miss target in tournament')
+                    green_o = mlines.Line2D([], [], color='green', marker='o', linestyle='None', markersize=10, label='Match/exceed target in practice')
+                    green_s = mlines.Line2D([], [], color='green', marker="*", linestyle='None', markersize=10, label='Match/exceed target in tournament')
+                    fig_legend, ax_legend = plt.subplots(figsize=(7, 0.7))
                     ax_legend.axis('off')
-                    handles = [blue_line, red_dot, green_dot]
-                    ax_legend.legend(handles=handles, loc='center', ncol=3, frameon=False, fontsize=12)
+                    handles = [blue_line, red_o, red_s, green_o, green_s]
+                    ax_legend.legend(handles=handles, loc='center', ncol=5, frameon=False, fontsize=12)
                     st.pyplot(fig_legend)
                     plt.close(fig_legend)
                 if date_col:
@@ -384,8 +387,13 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                     for j in range(len(x_dates)-1):
                                         # Thin pink line for Paris segments
                                         ax.plot(x_dates[j:j+2], y_vals[j:j+2], color='#ff69b4', linewidth=1)
+                                    # Use "*" marker for Tournament games, 'o' otherwise
+                                    mode_col = next((c for c in paris_df.columns if c.lower() == 'mode'), None)
                                     for j in range(len(x_dates)):
-                                        ax.plot(x_dates[j], y_vals[j], marker='o', color=node_colors[j], markersize=8)
+                                        marker_style = 'o'
+                                        if mode_col and str(paris_df.iloc[j][mode_col]).strip().lower() == 'tournament':
+                                            marker_style = "*"
+                                        ax.plot(x_dates[j], y_vals[j], marker=marker_style, color=node_colors[j], markersize=8)
                                     ax.set_xlabel("")
                                     ax.set_ylabel("")
                                     ax.set_title(label)
@@ -472,16 +480,19 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                 st.markdown('<h4 style="margin-bottom:0.5em;">Paris Stats Over Time</h4>', unsafe_allow_html=True)
                 date_col = next((c for c in df.columns if c.lower() == 'date'), None)
                 # Add legend explanation for Paris line (red miss, green match/exceed), and crimson dash line (target)
-                legend_cols = st.columns([1, 1, 1])
+                legend_cols = st.columns([1, 3, 1])
                 with legend_cols[1]:
                     import matplotlib.lines as mlines
                     blue_line = mlines.Line2D([], [], color='crimson', linestyle='--', linewidth=2, label='Target (D1)')
-                    red_dot = mlines.Line2D([], [], color='red', marker='o', linestyle='None', markersize=10, label='Miss Target')
-                    green_dot = mlines.Line2D([], [], color='green', marker='o', linestyle='None', markersize=10, label='Match/Exceed Target')
-                    fig_legend, ax_legend = plt.subplots(figsize=(5, 0.5))
+                    # Four new legend markers
+                    red_o = mlines.Line2D([], [], color='red', marker='o', linestyle='None', markersize=10, label='Miss target in practice')
+                    red_s = mlines.Line2D([], [], color='red', marker="*", linestyle='None', markersize=10, label='Miss target in tournament')
+                    green_o = mlines.Line2D([], [], color='green', marker='o', linestyle='None', markersize=10, label='Match/exceed target in practice')
+                    green_s = mlines.Line2D([], [], color='green', marker="*", linestyle='None', markersize=10, label='Match/exceed target in tournament')
+                    fig_legend, ax_legend = plt.subplots(figsize=(7, 0.7))
                     ax_legend.axis('off')
-                    handles = [blue_line, red_dot, green_dot]
-                    ax_legend.legend(handles=handles, loc='center', ncol=3, frameon=False, fontsize=12)
+                    handles = [blue_line, red_o, red_s, green_o, green_s]
+                    ax_legend.legend(handles=handles, loc='center', ncol=5, frameon=False, fontsize=12)
                     st.pyplot(fig_legend)
                     plt.close(fig_legend)
                 if date_col:
@@ -542,8 +553,13 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                     for j in range(len(x_dates)-1):
                                         # Thin pink line for Paris segments
                                         ax.plot(x_dates[j:j+2], y_vals[j:j+2], color='#ff69b4', linewidth=1)
+                                    # Use "*" marker for Tournament games, 'o' otherwise
+                                    mode_col = next((c for c in paris_df.columns if c.lower() == 'mode'), None)
                                     for j in range(len(x_dates)):
-                                        ax.plot(x_dates[j], y_vals[j], marker='o', color=node_colors[j], markersize=8)
+                                        marker_style = 'o'
+                                        if mode_col and str(paris_df.iloc[j][mode_col]).strip().lower() == 'tournament':
+                                            marker_style = "*"
+                                        ax.plot(x_dates[j], y_vals[j], marker=marker_style, color=node_colors[j], markersize=8)
                                     ax.set_xlabel("")
                                     ax.set_ylabel("")
                                     ax.set_title(str(metric_name))
@@ -663,16 +679,19 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             st.markdown('<h4 style="margin-bottom:0.5em;">Paris Stats Over Time</h4>', unsafe_allow_html=True)
             date_col = next((c for c in df.columns if c.lower() == 'date'), None)
             # Add legend explanation for Paris line (red miss, green match/exceed), and crimson dash line (target)
-            legend_cols = st.columns([1, 1, 1])
+            legend_cols = st.columns([1, 3, 1])
             with legend_cols[1]:
                 import matplotlib.lines as mlines
                 blue_line = mlines.Line2D([], [], color='crimson', linestyle='--', linewidth=2, label='Target (D1)')
-                red_dot = mlines.Line2D([], [], color='red', marker='o', linestyle='None', markersize=10, label='Miss Target')
-                green_dot = mlines.Line2D([], [], color='green', marker='o', linestyle='None', markersize=10, label='Match/Exceed Target')
-                fig_legend, ax_legend = plt.subplots(figsize=(5, 0.5))
+                # Four new legend markers
+                red_o = mlines.Line2D([], [], color='red', marker='o', linestyle='None', markersize=10, label='Miss target in practice')
+                red_s = mlines.Line2D([], [], color='red', marker="*", linestyle='None', markersize=10, label='Miss target in tournament')
+                green_o = mlines.Line2D([], [], color='green', marker='o', linestyle='None', markersize=10, label='Match/exceed target in practice')
+                green_s = mlines.Line2D([], [], color='green', marker="*", linestyle='None', markersize=10, label='Match/exceed target in tournament')
+                fig_legend, ax_legend = plt.subplots(figsize=(7, 0.7))
                 ax_legend.axis('off')
-                handles = [blue_line, red_dot, green_dot]
-                ax_legend.legend(handles=handles, loc='center', ncol=3, frameon=False, fontsize=12)
+                handles = [blue_line, red_o, red_s, green_o, green_s]
+                ax_legend.legend(handles=handles, loc='center', ncol=5, frameon=False, fontsize=12)
                 st.pyplot(fig_legend)
                 plt.close(fig_legend)
             if date_col:
@@ -715,8 +734,13 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                 for j in range(len(x_dates)-1):
                                     # Thin pink line for Paris segments
                                     ax.plot(x_dates[j:j+2], y_vals[j:j+2], color='#ff69b4', linewidth=1)
+                                # Use "*" marker for Tournament games, 'o' otherwise
+                                mode_col = next((c for c in paris_df.columns if c.lower() == 'mode'), None)
                                 for j in range(len(x_dates)):
-                                    ax.plot(x_dates[j], y_vals[j], marker='o', color=node_colors[j], markersize=8)
+                                    marker_style = 'o'
+                                    if mode_col and str(paris_df.iloc[j][mode_col]).strip().lower() == 'tournament':
+                                        marker_style = "*"
+                                    ax.plot(x_dates[j], y_vals[j], marker=marker_style, color=node_colors[j], markersize=8)
                                 ax.set_xlabel("")
                                 ax.set_ylabel("")
                                 ax.set_title('Total Putts per Hole')
@@ -733,10 +757,19 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                         with trend_cols[1]:
                             fig, ax = plt.subplots(figsize=(4, 2.5))
                             line_styles = ['-', '--', '-.', ':', (0, (3, 1, 1, 1))]
+                            mode_col = next((c for c in paris_df.columns if c.lower() == 'mode'), None)
                             for i, label in enumerate(putt_labels):
                                 colname = col(label)
                                 if colname and colname in paris_df.columns:
-                                    ax.plot(paris_df[date_col], paris_df[colname], marker='o', linestyle=line_styles[i % len(line_styles)], label=yticklabels[i])
+                                    for j, (x, y) in enumerate(zip(paris_df[date_col], paris_df[colname])):
+                                        marker_style = 'o'
+                                        if mode_col and str(paris_df.iloc[j][mode_col]).strip().lower() == 'tournament':
+                                            marker_style = "*"
+                                        # Only add label for the first point to avoid duplicate legend entries
+                                        ax.plot(x, y, marker=marker_style, linestyle=line_styles[i % len(line_styles)], label=yticklabels[i] if j == 0 else "")
+                            handles, labels = ax.get_legend_handles_labels()
+                            by_label = dict(zip(labels, handles))
+                            ax.legend(by_label.values(), by_label.keys(), loc='center left', bbox_to_anchor=(1, 0.5), fontsize=8)
                             ax.set_xlabel("")
                             ax.set_ylabel("")
                             ax.set_title('Putts per Hole by Distance')
@@ -774,8 +807,13 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                 for j in range(len(x_dates)-1):
                                     # Thin pink line for Paris segments
                                     ax.plot(x_dates[j:j+2], y_vals[j:j+2], color='#ff69b4', linewidth=1)
-                                for j in range(len(x_dates)):
-                                    ax.plot(x_dates[j], y_vals[j], marker='o', color=node_colors[j], markersize=8)
+                                    # Use "*" marker for Tournament games, 'o' otherwise
+                                    mode_col = next((c for c in paris_df.columns if c.lower() == 'mode'), None)
+                                    for j in range(len(x_dates)):
+                                        marker_style = 'o'
+                                        if mode_col and str(paris_df.iloc[j][mode_col]).strip().lower() == 'tournament':
+                                            marker_style = "*"
+                                        ax.plot(x_dates[j], y_vals[j], marker=marker_style, color=node_colors[j], markersize=8)
                                 ax.set_xlabel("")
                                 ax.set_ylabel("")
                                 ax.set_title('Up and Down %')
