@@ -768,7 +768,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                     #                 for j in range(len(paris_df)):
                     #                     marker_style = 'o'
                     #                     if mode_col and str(paris_df.iloc[j][mode_col]).strip().lower() == 'tournament':
-                    #                         marker_style = "s"
+                    #                         marker_style = "*"
                     #                     ax.plot(paris_df[date_col].iloc[j], paris_df[colname].iloc[j], marker=marker_style, linestyle='None', markersize=8)
                     #         handles, labels = ax.get_legend_handles_labels()
                     #         by_label = dict(zip(labels, handles))
@@ -939,7 +939,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                 for j in range(len(paris_df)):
                                     marker_style = 'o'
                                     if mode_col and str(paris_df.iloc[j][mode_col]).strip().lower() == 'tournament':
-                                        marker_style = "s"
+                                        marker_style = "*"
                                     ax.plot(paris_df[date_col].iloc[j], paris_df[colname].iloc[j], marker=marker_style, linestyle='None', markersize=8, color=node_colors[j])
                                 ax.set_xlabel("")
                                 ax.set_ylabel("")
