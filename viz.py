@@ -151,7 +151,7 @@ def main():
             letter = f"""
 Dear Paris,
 
-Here is a quick summary of your recent golf performance, focusing on your strengths and areas for growth. Let's keep building on what you do well and target a few key opportunities for improvement.
+Here is a quick summary of your recent golf performance, focusing on your strengths and areas for growth. Let's keep building on what you do well and Target (D1) a few key opportunities for improvement.
 """
             if last_game_date_str:
                 letter = f"<div style='color:gray; font-size: 0.95em; margin-bottom: 0.5em;'>As of last game: <b>{last_game_date_str}</b></div>\n" + letter
@@ -332,7 +332,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                 legend_cols = st.columns([1, 1, 1])
                 with legend_cols[1]:
                     import matplotlib.lines as mlines
-                    blue_line = mlines.Line2D([], [], color='deepskyblue', linestyle='--', linewidth=2, label='Target')
+                    blue_line = mlines.Line2D([], [], color='crimson', linestyle='--', linewidth=2, label='Target (D1)')
                     red_dot = mlines.Line2D([], [], color='red', marker='o', linestyle='None', markersize=10, label='Miss Target')
                     green_dot = mlines.Line2D([], [], color='green', marker='o', linestyle='None', markersize=10, label='Match/Exceed Target')
                     fig_legend, ax_legend = plt.subplots(figsize=(5, 0.5))
@@ -365,7 +365,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                     d1_avg = None
                                     if metric in comparison_df.columns:
                                         d1_avg = comparison_df[comparison_df[course_col_name]=='D1 Average'][metric].values[0]
-                                        ax.axhline(d1_avg, color='deepskyblue', linestyle='--', linewidth=2, label='D1 Target')
+                                        ax.axhline(d1_avg, color='crimson', linestyle='--', linewidth=2, label='D1 Target')
                                     # Determine color for each segment/node
                                     line_colors = []
                                     node_colors = []
@@ -471,11 +471,11 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                 # --- Second row: Paris trend lines over time ---
                 st.markdown('<h4 style="margin-bottom:0.5em;">Paris Stats Over Time</h4>', unsafe_allow_html=True)
                 date_col = next((c for c in df.columns if c.lower() == 'date'), None)
-                # Add legend explanation for Paris line (red miss, green match/exceed), and deepskyblue dash line (target)
+                # Add legend explanation for Paris line (red miss, green match/exceed), and crimson dash line (target)
                 legend_cols = st.columns([1, 1, 1])
                 with legend_cols[1]:
                     import matplotlib.lines as mlines
-                    blue_line = mlines.Line2D([], [], color='deepskyblue', linestyle='--', linewidth=2, label='Target')
+                    blue_line = mlines.Line2D([], [], color='crimson', linestyle='--', linewidth=2, label='Target (D1)')
                     red_dot = mlines.Line2D([], [], color='red', marker='o', linestyle='None', markersize=10, label='Miss Target')
                     green_dot = mlines.Line2D([], [], color='green', marker='o', linestyle='None', markersize=10, label='Match/Exceed Target')
                     fig_legend, ax_legend = plt.subplots(figsize=(5, 0.5))
@@ -507,7 +507,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                     d1_avg = None
                                     if metric in comparison_df.columns:
                                         d1_avg = comparison_df[comparison_df[course_col_name]=='D1 Average'][metric].values[0]
-                                        ax.axhline(d1_avg, color='deepskyblue', linestyle='--', linewidth=2, label='D1 Target')
+                                        ax.axhline(d1_avg, color='crimson', linestyle='--', linewidth=2, label='D1 Target')
                                     # Determine color for each segment/node
                                     metric_name = metric if isinstance(metric, str) else ''
                                     fir_gir_metrics = ['FIR %', 'GIR %']
@@ -662,11 +662,11 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             # --- Second row: Paris trend lines over time ---
             st.markdown('<h4 style="margin-bottom:0.5em;">Paris Stats Over Time</h4>', unsafe_allow_html=True)
             date_col = next((c for c in df.columns if c.lower() == 'date'), None)
-            # Add legend explanation for Paris line (red miss, green match/exceed), and deepskyblue dash line (target)
+            # Add legend explanation for Paris line (red miss, green match/exceed), and crimson dash line (target)
             legend_cols = st.columns([1, 1, 1])
             with legend_cols[1]:
                 import matplotlib.lines as mlines
-                blue_line = mlines.Line2D([], [], color='deepskyblue', linestyle='--', linewidth=2, label='Target')
+                blue_line = mlines.Line2D([], [], color='crimson', linestyle='--', linewidth=2, label='Target (D1)')
                 red_dot = mlines.Line2D([], [], color='red', marker='o', linestyle='None', markersize=10, label='Miss Target')
                 green_dot = mlines.Line2D([], [], color='green', marker='o', linestyle='None', markersize=10, label='Match/Exceed Target')
                 fig_legend, ax_legend = plt.subplots(figsize=(5, 0.5))
@@ -698,7 +698,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                 d1_avg = None
                                 if putts_col in comparison_df.columns:
                                     d1_avg = comparison_df[comparison_df[course_col_name]=='D1 Average'][putts_col].values[0]
-                                    ax.axhline(d1_avg, color='deepskyblue', linestyle='--', linewidth=2, label='D1 Target')
+                                    ax.axhline(d1_avg, color='crimson', linestyle='--', linewidth=2, label='D1 Target')
                                 line_colors = []
                                 node_colors = []
                                 for y in y_vals:
@@ -757,7 +757,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                 d1_avg = None
                                 if updown_col in comparison_df.columns:
                                     d1_avg = comparison_df[comparison_df[course_col_name]=='D1 Average'][updown_col].values[0]
-                                    ax.axhline(d1_avg, color='deepskyblue', linestyle='--', linewidth=2, label='D1 Target')
+                                    ax.axhline(d1_avg, color='crimson', linestyle='--', linewidth=2, label='D1 Target')
                                 line_colors = []
                                 node_colors = []
                                 for y in y_vals:
@@ -797,7 +797,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                 d1_avg = None
                                 if updown_dist_col in comparison_df.columns:
                                     d1_avg = comparison_df[comparison_df[course_col_name]=='D1 Average'][updown_dist_col].values[0]
-                                    ax.axhline(d1_avg, color='deepskyblue', linestyle='--', linewidth=2, label='D1 Target')
+                                    ax.axhline(d1_avg, color='crimson', linestyle='--', linewidth=2, label='D1 Target')
                                 line_colors = []
                                 node_colors = []
                                 for y in y_vals:
@@ -837,7 +837,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                 d1_avg = None
                                 if updown_miss_col in comparison_df.columns:
                                     d1_avg = comparison_df[comparison_df[course_col_name]=='D1 Average'][updown_miss_col].values[0]
-                                    ax.axhline(d1_avg, color='deepskyblue', linestyle='--', linewidth=2, label='D1 Target')
+                                    ax.axhline(d1_avg, color='crimson', linestyle='--', linewidth=2, label='D1 Target')
                                 line_colors = []
                                 node_colors = []
                                 for y in y_vals:
@@ -974,7 +974,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
         legend_cols = st.columns([2, 1, 2])
         with legend_cols[1]:
             import matplotlib.lines as mlines
-            blue_line = mlines.Line2D([], [], color='deepskyblue', linestyle='--', linewidth=2, label='Target')
+            blue_line = mlines.Line2D([], [], color='crimson', linestyle='--', linewidth=2, label='Target (D1)')
             red_dot = mlines.Line2D([], [], color='red', marker='o', linestyle='None', markersize=10, label='Miss Target')
             green_dot = mlines.Line2D([], [], color='green', marker='o', linestyle='None', markersize=10, label='Match/Exceed Target')
             fig_legend, ax_legend = plt.subplots(figsize=(5, 0.5))
@@ -1000,7 +1000,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             colors = df['Score Diff from Par'].apply(lambda y: 'green' if y <= y0 else 'red')
             # Add light grey shade for X >= 13
             ax.axvspan(13, 20, color='lightgrey', alpha=0.4, zorder=0)
-            ax.axhline(y0, color='deepskyblue', linestyle='--', linewidth=2, alpha=0.5)
+            ax.axhline(y0, color='crimson', linestyle='--', linewidth=2, alpha=0.5)
             # Make dot size proportional to the number of overlapping points (relative frequency)
             xy = list(zip(df['Hole Handicap'], df['Score Diff from Par']))
             from collections import Counter
@@ -1027,7 +1027,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             y0 = 8
             colors2 = df[gir_miss_col].apply(lambda y: 'green' if y <= y0 else 'red')
             ax2.axvspan(0, 125, color='lightgrey', alpha=0.4, zorder=0)
-            ax2.axhline(y0, color='deepskyblue', linestyle='--', linewidth=2, alpha=0.5)
+            ax2.axhline(y0, color='crimson', linestyle='--', linewidth=2, alpha=0.5)
             xy2 = list(zip(df[approach_col], df[gir_miss_col]))
             freq2 = Counter(xy2)
             s2 = np.array([40 * freq2[(x, y)] for x, y in xy2])
@@ -1047,7 +1047,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                 y0 = 21.5
                 colors3 = df_nonan[gir_miss_pin_col].apply(lambda y: 'green' if y <= y0 else 'red')
                 ax3.axvspan(0, 100, color='lightgrey', alpha=0.4, zorder=0)
-                ax3.axhline(y0, color='deepskyblue', linestyle='--', linewidth=2, alpha=0.5)
+                ax3.axhline(y0, color='crimson', linestyle='--', linewidth=2, alpha=0.5)
                 xy3 = list(zip(df_nonan[approach_col], df_nonan[gir_miss_pin_col]))
                 freq3 = Counter(xy3)
                 s3 = np.array([40 * freq3[(x, y)] for x, y in xy3])
@@ -1068,7 +1068,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                 y0 = 10
                 colors4 = df_updown[updown_miss_col].apply(lambda y: 'green' if y <= y0 else 'red')
                 ax4.axvspan(0, 15, color='lightgrey', alpha=0.4, zorder=0)
-                ax4.axhline(y0, color='deepskyblue', linestyle='--', linewidth=2, alpha=0.5)
+                ax4.axhline(y0, color='crimson', linestyle='--', linewidth=2, alpha=0.5)
                 xy4 = list(zip(df_updown[updown_dist_col], df_updown[updown_miss_col]))
                 freq4 = Counter(xy4)
                 s4 = np.array([40 * freq4[(x, y)] for x, y in xy4])
