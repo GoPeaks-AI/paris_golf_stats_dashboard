@@ -151,7 +151,7 @@ def main():
             letter = f"""
 Dear Paris,
 
-Here is a quick summary of your recent golf performance, focusing on your strengths and areas for growth. Let's keep building on what you do well and Target (D1) a few key opportunities for improvement.
+Here is a quick summary of your recent golf performance, focusing on your strengths and areas for growth vis-a-vis D1 average. Let's keep building on what you do well and target a few key opportunities for improvement.
 """
             if last_game_date_str:
                 letter = f"<div style='color:gray; font-size: 0.95em; margin-bottom: 0.5em;'>As of last game: <b>{last_game_date_str}</b></div>\n" + letter
