@@ -819,7 +819,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                         ax.plot(x_dates[j], y_vals[j], marker=marker_style, color=node_colors[j], markersize=8)
                                 ax.set_xlabel("")
                                 ax.set_ylabel("")
-                                ax.set_title('Up and Down %')
+                                ax.set_title('Up & Down %')
                                 ax.grid(True, linestyle='--', alpha=0.5)
                                 ax.set_xticks(x_dates)
                                 ax.set_xticklabels([d.strftime('%Y-%m-%d') if not pd.isna(d) else '' for d in x_dates], rotation=90, fontsize=7)
@@ -855,8 +855,12 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                 for j in range(len(x_dates)-1):
                                     # Thin pink line for Paris segments
                                     ax.plot(x_dates[j:j+2], y_vals[j:j+2], color='#ff69b4', linewidth=1)
+                                mode_col = next((c for c in paris_df.columns if c.lower() == 'mode'), None)
                                 for j in range(len(x_dates)):
-                                    ax.plot(x_dates[j], y_vals[j], marker='o', color=node_colors[j], markersize=8)
+                                    marker_style = 'o'
+                                    if mode_col and str(paris_df.iloc[j][mode_col]).strip().lower() == 'tournament':
+                                        marker_style = '*'
+                                    ax.plot(x_dates[j], y_vals[j], marker=marker_style, color=node_colors[j], markersize=8)
                                 ax.set_xlabel("")
                                 ax.set_ylabel("")
                                 ax.set_title('Up & Down Distance from Pin (yds)')
@@ -895,8 +899,12 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                                 for j in range(len(x_dates)-1):
                                     # Thin pink line for Paris segments
                                     ax.plot(x_dates[j:j+2], y_vals[j:j+2], color='#ff69b4', linewidth=1)
+                                mode_col = next((c for c in paris_df.columns if c.lower() == 'mode'), None)
                                 for j in range(len(x_dates)):
-                                    ax.plot(x_dates[j], y_vals[j], marker='o', color=node_colors[j], markersize=8)
+                                    marker_style = 'o'
+                                    if mode_col and str(paris_df.iloc[j][mode_col]).strip().lower() == 'tournament':
+                                        marker_style = '*'
+                                    ax.plot(x_dates[j], y_vals[j], marker=marker_style, color=node_colors[j], markersize=8)
                                 ax.set_xlabel("")
                                 ax.set_ylabel("")
                                 ax.set_title('Up & Down Miss from Pin (ft)')
