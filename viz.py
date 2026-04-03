@@ -1078,6 +1078,23 @@ Here is a quick summary of your recent golf performance, focusing on your streng
 
         df = gpd.run(csv_url)
 
+        def add_match_exceed_pct(ax, series, target):
+            vals = pd.to_numeric(series, errors='coerce').dropna()
+            if vals.empty:
+                return
+            pct = (vals <= target).mean() * 100
+            ax.text(
+                0.03,
+                0.95,
+                f"{pct:.0f}%",
+                transform=ax.transAxes,
+                color='green',
+                fontsize=16,
+                fontweight='bold',
+                ha='left',
+                va='top'
+            )
+
         # Fill GIR miss from green with 0 if empty
         gir_miss_col = 'Approach shot GIR miss from green (yds)'
         if gir_miss_col in df.columns:
@@ -1109,6 +1126,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             y_min = -2
             y_max = int(np.ceil(np.nanmax(df['Score Diff from Par'])))
             ax.set_yticks([i for i in range(y_min, y_max+1)])
+            add_match_exceed_pct(ax, df['Score Diff from Par'], y0)
             with cols[0]:
                 st.pyplot(fig)
 
@@ -1127,6 +1145,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
             ax2.set_title('Approach Distance from Pin vs GIR Miss from Green')
             ax2.set_xlabel('Approach shot distance (yds) from pin')
             ax2.set_ylabel('GIR miss from green (yds)')
+            add_match_exceed_pct(ax2, df[gir_miss_col], y0)
             with cols[1]:
                 st.pyplot(fig2)
 
@@ -1147,6 +1166,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                 ax3.set_title('Approach Distance from Pin vs GIR Miss from Pin')
                 ax3.set_xlabel('Approach shot distance (yds) from pin')
                 ax3.set_ylabel('GIR miss from pin (ft)')
+                add_match_exceed_pct(ax3, df_nonan[gir_miss_pin_col], y0)
                 with cols[2]:
                     st.pyplot(fig3)
 
@@ -1168,6 +1188,7 @@ Here is a quick summary of your recent golf performance, focusing on your streng
                 ax4.set_title('Scramble Up & Down Distance vs Miss from Pin')
                 ax4.set_xlabel('Scramble up & down distance from pin (yds)')
                 ax4.set_ylabel('Scramble up & down miss from pin (ft)')
+                add_match_exceed_pct(ax4, df_updown[updown_miss_col], y0)
                 with cols[3]:
                     st.pyplot(fig4)
 
